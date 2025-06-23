@@ -2,6 +2,8 @@ import Header from "@/components/header"
 import DashboardSummary from "@/components/dashboard-summary"
 import AssetListing from "@/components/asset-listing"
 
+export const dynamic = 'force-dynamic'
+
 export default function MarketplacePage() {
   return (
     <div className="min-h-screen bg-white">

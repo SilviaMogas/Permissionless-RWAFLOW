@@ -5,6 +5,20 @@ import { Button } from '@/components/ui/button'
 import { useAccount, useDisconnect } from 'wagmi'
 
 export function LoginButton() {
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
+  
+  // During build time or when Privy is not configured, show a disabled button
+  if (!appId || appId === 'dummy-build-value') {
+    return (
+      <Button 
+        disabled
+        className="bg-green-gradient text-white hover:opacity-90 transition-opacity"
+      >
+        Login
+      </Button>
+    )
+  }
+
   const { login, logout, authenticated, user } = usePrivy()
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()

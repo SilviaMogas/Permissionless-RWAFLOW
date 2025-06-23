@@ -189,3 +189,5 @@ export default function LearningModulesPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'
