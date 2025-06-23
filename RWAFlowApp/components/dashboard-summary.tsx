@@ -137,12 +137,6 @@ export default function DashboardSummary() {
         </Card>
       </div>
 
-      <div className="text-center">
-        <p className="text-xl text-gray-700 mb-4">Welcome back, {dashboardData.status}!</p>
-        <Button size="lg" className="bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md">
-          Explore More Assets
-        </Button>
-      </div>
     </section>
   )
 }
