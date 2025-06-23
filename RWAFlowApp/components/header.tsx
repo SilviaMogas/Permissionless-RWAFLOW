@@ -5,17 +5,16 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
+import { LoginButton } from "@/components/login-button"
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
-      {" "}
-      {/* Simple white background */}
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image src="/flow-passport-logo.png" alt="Flow Passport Logo" width={32} height={32} className="h-8 w-8" />
-            <span className="font-bold text-lg text-gray-800">FLOW PASSPORT</span> {/* Darker text for name */}
+            <span className="font-bold text-lg text-gray-800">FLOW PASSPORT</span>
           </Link>
           <nav className="hidden gap-6 text-sm font-medium md:flex">
             <Link href="/marketplace" className="transition-colors text-gray-600 hover:text-metallic-green">
@@ -27,9 +26,9 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button className="hidden md:inline-flex bg-green-gradient text-white hover:opacity-90 transition-opacity">
-            Login
-          </Button>
+          <div className="hidden md:inline-flex">
+            <LoginButton />
+          </div>
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -55,7 +54,7 @@ export default function Header() {
                 >
                   Learn
                 </Link>
-                <Button className="bg-green-gradient text-white hover:opacity-90 transition-opacity">Login</Button>
+                <LoginButton />
               </div>
             </SheetContent>
           </Sheet>
