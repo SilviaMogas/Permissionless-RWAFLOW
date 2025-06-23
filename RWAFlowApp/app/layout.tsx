@@ -5,6 +5,7 @@ import Footer from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import GlobalBackground from "@/components/global-background"
 import { PrivyWagmiProvider } from "@/providers/privy-provider"
+import { AgentBubble } from "@/components/agent-bubble"
 
 export const metadata: Metadata = {
   title: "Flow Passport - Your Gateway to Onchain Identity, Investment & Education",
@@ -27,6 +28,7 @@ export default function RootLayout({
               <main className="flex-grow">{children}</main>
               <Footer />
             </div>
+            <AgentBubble />
           </ThemeProvider>
         </PrivyWagmiProvider>
       </body>
