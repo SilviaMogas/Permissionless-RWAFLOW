@@ -96,6 +96,17 @@ If automatic verification fails, you can manually verify:
 npm run verify <CONTRACT_ADDRESS>
 ```
 
+For contracts that require constructor arguments (like RWAFlow), use:
+
+```bash
+npx hardhat verify --network flowTestnet <CONTRACT_ADDRESS> "INITIAL_OWNER_ADDRESS"
+```
+
+Example for the deployed RWAFlow contract:
+```bash
+npx hardhat verify --network flowTestnet 0x6fBD4A26B44046716e37cD93Db5c47832E276AeB "0xd4af2053496Da8809BF69FF2A96E86831A8b2b62"
+```
+
 ### Run Tests
 
 ```bash
