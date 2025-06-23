@@ -218,18 +218,16 @@ export default function AcademyPage() {
           <Card className="lg:col-span-2 shadow-xl bg-white border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-xl text-gray-800">Module Progress</CardTitle>
-              <Link href="/academy/modules" passHref>
-                <Button asChild className="bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md">
-                  <a>
-                    <PlayCircle className="mr-2 h-4 w-4" /> View All Quizzes
-                  </a>
-                </Button>
-              </Link>
+              <Button asChild className="bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md">
+                <Link href="/academy/modules">
+                  <PlayCircle className="mr-2 h-4 w-4" /> View All Quizzes
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent className="space-y-3">
               {modules.map((quizModule) => (
-                <Link key={quizModule.id} href={`/academy/module/${quizModule.id}`} passHref>
-                  <a className="flex items-center justify-between p-4 bg-gray-50 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors border border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md">
+                <Link key={quizModule.id} href={`/academy/module/${quizModule.id}`} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors border border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md">
+
                     <div>
                       <p className="font-semibold text-gray-700">{quizModule.title}</p>
                       <p className="text-sm text-gray-500">
@@ -241,7 +239,7 @@ export default function AcademyPage() {
                     ) : (
                       <Circle className="h-6 w-6 text-gray-300" />
                     )}
-                  </a>
+
                 </Link>
               ))}
             </CardContent>

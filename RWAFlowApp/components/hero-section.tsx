@@ -32,27 +32,25 @@ export default function HeroSection() {
             investment plan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/onboarding" passHref>
-              <Button
-                asChild
-                size="lg"
-                className="bg-green-gradient text-white px-8 py-4 text-lg font-semibold shadow-md hover:opacity-90 transition-opacity"
-              >
-                <a>
-                  Start Onboarding <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
-              </Button>
-            </Link>
-            <Link href="/marketplace" passHref>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="px-8 py-4 text-lg font-semibold border-2 border-metallic-green text-metallic-green hover:bg-emerald-50 transition-colors"
-              >
-                <a>Explore Marketplace</a>
-              </Button>
-            </Link>
+            <Button
+              asChild
+              size="lg"
+              className="bg-green-gradient text-white px-8 py-4 text-lg font-semibold shadow-md hover:opacity-90 transition-opacity"
+            >
+              <Link href="/onboarding">
+                Start Onboarding <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="px-8 py-4 text-lg font-semibold border-2 border-metallic-green text-metallic-green hover:bg-emerald-50 transition-colors"
+            >
+              <Link href="/marketplace">
+                Explore Marketplace
+              </Link>
+            </Button>
           </div>
           <div className="mt-16 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-500 mb-4">Trusted by investors worldwide</p>
