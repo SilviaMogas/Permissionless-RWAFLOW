@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import GlobalBackground from "@/components/global-background"
 import { PrivyWagmiProvider } from "@/providers/privy-provider"
 import { AgentBubble } from "@/components/agent-bubble"
+import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
   title: "Flow Passport - Your Gateway to Onchain Identity, Investment & Education",
@@ -29,6 +30,7 @@ export default function RootLayout({
               <Footer />
             </div>
             <AgentBubble />
+            <Toaster position="top-right" />
           </ThemeProvider>
         </PrivyWagmiProvider>
       </body>
