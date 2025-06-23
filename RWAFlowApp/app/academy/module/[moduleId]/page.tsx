@@ -160,3 +160,5 @@ export default function ModulePage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

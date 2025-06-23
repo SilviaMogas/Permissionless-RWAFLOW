@@ -29,9 +29,16 @@ interface PrivyWagmiProviderProps {
 }
 
 export function PrivyWagmiProvider({ children }: PrivyWagmiProviderProps) {
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
+  
+  // During build time or when app ID is not available, render children without any providers
+  if (!appId || appId === 'dummy-build-value') {
+    return <>{children}</>
+  }
+
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+      appId={appId}
       config={privyConfig}
     >
       <QueryClientProvider client={queryClient}>
