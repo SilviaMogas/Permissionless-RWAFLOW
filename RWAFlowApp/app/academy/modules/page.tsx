@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Play } from "lucide-react"
-import type { LearningModule, QuizQuestion } from "@/app/academy/module/[moduleId]/page" // Assuming types are exported or defined here
+import type { LearningModule, QuizQuestion } from "@/app/academy/module/[moduleId]/types"
 
 // --- CSV data and parsing function (same as used in other academy pages) ---
 const csvData = `Level,Question,Option A,Option B,Option C,Correct Answer

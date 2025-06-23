@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle } from "lucide-react"
-import type { QuizQuestion, LearningModule } from "@/app/academy/module/[moduleId]/page"
+import type { QuizQuestion, LearningModule } from "@/app/academy/module/[moduleId]/types"
 
 const csvData = `Level,Question,Option A,Option B,Option C,Correct Answer
 Beginner,What is a bond?,A digital currency,A fixed-income investment,A type of blockchain,B

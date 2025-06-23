@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import Footer from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
-import GlobalBackground from "@/components/global-background" // Import the new component
+import GlobalBackground from "@/components/global-background"
+import { PrivyWagmiProvider } from "@/providers/privy-provider"
 
 export const metadata: Metadata = {
   title: "Flow Passport - Your Gateway to Onchain Identity, Investment & Education",
@@ -19,15 +20,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          <GlobalBackground /> {/* Add the global background component here */}
-          <div className="flex flex-col min-h-screen relative z-0">
-            {" "}
-            {/* Ensure content is above background */}
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
-        </ThemeProvider>
+        <PrivyWagmiProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            <GlobalBackground />
+            <div className="flex flex-col min-h-screen relative z-0">
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
+          </ThemeProvider>
+        </PrivyWagmiProvider>
       </body>
     </html>
   )
