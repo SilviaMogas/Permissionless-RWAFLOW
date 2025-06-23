@@ -174,17 +174,14 @@ export default function LearningModulesPage() {
                 </p>
               </CardContent>
               <CardFooter>
-                <Link href={`/academy/module/${quizModule.id}`} passHref className="w-full">
-                  <Button
-                    asChild
-                    className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
-                  >
-                    <a>
-                      <Play className="mr-2 h-4 w-4" /> Start Quiz
-                    </a>
-                  </Button>
-                </Link>
-              </CardFooter>
+                <Button
+                  asChild
+                  className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
+                >
+                  <Link href={`/academy/module/${quizModule.id}`}>
+                    <Play className="mr-2 h-4 w-4" /> Start Quiz
+                  </Link>
+                </Button>              </CardFooter>
             </Card>
           ))}
         </div>
