@@ -1,0 +1,78 @@
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+
+export default function HeroSection() {
+  return (
+    <section className="py-20 md:py-32 lg:py-40 bg-white">
+      {" "}
+      {/* White background */}
+      <div className="container mx-auto px-4 text-center">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col items-center justify-center mb-8 space-y-6">
+            <div className="flex items-center space-x-4">
+              <Image
+                src="/flow-passport-logo.png"
+                alt="Flow Passport Logo"
+                width={64}
+                height={64}
+                className="h-16 w-16"
+              />
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight">
+                Welcome to <span className="text-metallic-green">Flow Passport</span> {/* Metallic green accent */}
+              </h1>
+            </div>
+            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 font-medium max-w-3xl leading-relaxed">
+              Your Gateway to Onchain Identity, Investment & Education.
+            </p>
+          </div>
+          <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Discover, compare and invest in verified tokenized real-world assets. Let's create your personalized
+            investment plan.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link href="/onboarding" passHref>
+              <Button
+                asChild
+                size="lg"
+                className="bg-green-gradient text-white px-8 py-4 text-lg font-semibold shadow-md hover:opacity-90 transition-opacity"
+              >
+                <a>
+                  Start Onboarding <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
+              </Button>
+            </Link>
+            <Link href="/marketplace" passHref>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="px-8 py-4 text-lg font-semibold border-2 border-metallic-green text-metallic-green hover:bg-emerald-50 transition-colors"
+              >
+                <a>Explore Marketplace</a>
+              </Button>
+            </Link>
+          </div>
+          <div className="mt-16 pt-8 border-t border-gray-200">
+            <p className="text-sm text-gray-500 mb-4">Trusted by investors worldwide</p>
+            <div className="flex justify-center items-center space-x-8 text-gray-500">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-metallic-green rounded-full"></div>
+                <span className="text-sm font-medium">Verified Assets</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-metallic-green rounded-full"></div>
+                <span className="text-sm font-medium">Secure Platform</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-metallic-green rounded-full"></div>
+                <span className="text-sm font-medium">Educational Resources</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
