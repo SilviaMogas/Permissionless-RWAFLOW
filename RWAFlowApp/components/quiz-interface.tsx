@@ -131,7 +131,7 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
         <div className="space-y-3 mb-8">
           {currentQuestion.options.map((option) => {
             const isSelected = selectedAnswerId === option.id
-            let buttonClasses = "border-gray-300 text-gray-700 hover:border-metallic-green hover:bg-emerald-50/50"
+            let buttonClasses = "border-gray-300 text-gray-700 bg-white hover:border-metallic-green hover:bg-emerald-50/50 hover:text-metallic-green"
             let icon = null
 
             if (isAnswerConfirmed) {
@@ -142,7 +142,7 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
                 buttonClasses = "bg-red-50 border-red-400 text-red-700 ring-2 ring-red-400"
                 icon = <AlertTriangle className="mr-2 h-5 w-5 text-red-600 flex-shrink-0" />
               } else {
-                buttonClasses = "border-gray-300 text-gray-500 opacity-70" // Muted for non-selected, non-correct after answer
+                buttonClasses = "border-gray-300 text-gray-500 bg-white opacity-70" // Muted for non-selected, non-correct after answer
               }
             } else if (isSelected) {
               buttonClasses = "bg-emerald-50 border-metallic-green text-metallic-green ring-2 ring-metallic-green"
@@ -152,9 +152,20 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
               <Button
                 key={option.id}
                 variant="outline"
-                className={`w-full justify-start h-auto py-3 text-left whitespace-normal transition-all duration-150 flex items-center ${buttonClasses}`}
+                className={`w-full justify-start h-auto py-3 text-left whitespace-normal transition-all duration-150 flex items-center !bg-transparent ${buttonClasses}`}
                 onClick={() => handleAnswerSelect(option.id)}
                 disabled={isAnswerConfirmed}
+                style={{
+                  backgroundColor: isAnswerConfirmed 
+                    ? (option.id === currentQuestion.correctAnswerId 
+                        ? 'rgb(236 253 245)' // emerald-50
+                        : isSelected && option.id !== currentQuestion.correctAnswerId 
+                          ? 'rgb(254 242 242)' // red-50
+                          : 'white')
+                    : isSelected 
+                      ? 'rgb(236 253 245)' // emerald-50
+                      : 'white'
+                }}
               >
                 {icon}
                 <span className="flex-grow">{option.text}</span>
