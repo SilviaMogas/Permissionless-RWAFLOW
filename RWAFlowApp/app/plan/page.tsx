@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation" // useRouter not used, can be removed
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -57,10 +57,15 @@ function generatePlanDetails(formData: Record<string, any>): PlanDetails {
 function PlanDisplay() {
   const searchParams = useSearchParams()
   const formDataString = searchParams.get("data")
+  const [recommendation, setRecommendation] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  
   let planDetails: PlanDetails
+  let formData = {}
+  
   if (formDataString) {
     try {
-      const formData = JSON.parse(formDataString)
+      formData = JSON.parse(formDataString)
       planDetails = generatePlanDetails(formData)
     } catch (error) {
       console.error("Failed to parse form data:", error)
@@ -68,6 +73,36 @@ function PlanDisplay() {
     }
   } else {
     planDetails = generatePlanDetails({})
+  }
+  
+  useEffect(() => {
+    if (formDataString) {
+      fetchPortfolioRecommendation(formData)
+    }
+  }, [formDataString])
+  
+  const fetchPortfolioRecommendation = async (onboardingData: any) => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/agent/portfolio-recommendation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ onboardingData }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setRecommendation(data.recommendation)
+      } else {
+        console.error('Failed to fetch recommendation')
+      }
+    } catch (error) {
+      console.error('Error fetching recommendation:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -109,6 +144,34 @@ function PlanDisplay() {
                 </Card>
               </div>
             </div>
+            
+            {isLoading && (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <p className="text-blue-700">Getting AI-powered recommendations...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {recommendation && (
+              <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-purple-800 flex items-center">
+                    <span className="mr-2">🤖</span>
+                    AI Portfolio Recommendations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                    {recommendation}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <Link href="/marketplace" passHref className="w-full">
               <Button
                 asChild
