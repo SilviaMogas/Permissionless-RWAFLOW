@@ -316,11 +316,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🔗 Links & Resources
 
-- **Website**: [Flow Passport Platform](https://flowpassport.com)
-- **Documentation**: [Developer Docs](https://docs.flowpassport.com)
+- **Live Application**: [Flow Passport Platform](https://flow-passport.vercel.app/)
+- **Pitch Deck**: [Project Presentation](https://www.canva.com/design/DAGrIUspFyc/vcwA0SHoc4inO0rgCk_rcw/edit)
+- **FlowScan**: [Smart Contract Explorer](https://evm-testnet.flowscan.io)
 - **Community**: [Discord](https://discord.gg/flowpassport)
 - **Twitter**: [@FlowPassport](https://twitter.com/flowpassport)
-- **FlowScan**: [Contract Explorer](https://evm-testnet.flowscan.io)
 
 ## 💡 Support
 
