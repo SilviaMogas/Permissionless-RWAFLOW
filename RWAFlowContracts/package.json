@@ -6,10 +6,13 @@
     "compile": "hardhat compile",
     "deploy:testnet": "hardhat run scripts/deploy.js --network flowTestnet",
     "deploy:marketplace": "hardhat run scripts/deploy-marketplace.js --network flowTestnet",
+    "deploy:academy": "hardhat run scripts/deploy-academy.js --network flowTestnet",
     "verify": "node scripts/verify.js",
     "verify:marketplace": "hardhat run scripts/verify-marketplace.js --network flowTestnet",
+    "verify:academy": "hardhat run scripts/verify-academy.js --network flowTestnet",
     "check:marketplace": "hardhat run scripts/check-marketplace.js --network flowTestnet",
     "test:purchase": "hardhat run scripts/test-purchase.js --network flowTestnet",
+    "test:academy": "hardhat run scripts/test-academy.js --network flowTestnet",
     "test": "hardhat test"
   },
   "keywords": [],

@@ -1,11 +1,15 @@
+"use client"
+
 import type React from "react"
 import Header from "@/components/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle } from "lucide-react"
+import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle, Medal } from "lucide-react"
 import type { QuizQuestion, LearningModule } from "@/app/academy/module/[moduleId]/types"
+import { useAcademyContracts } from "@/hooks/use-academy-contracts"
+import { useAuth } from "@/hooks/use-auth"
 
 const csvData = `Level,Question,Option A,Option B,Option C,Correct Answer
 Beginner,What is a bond?,A digital currency,A fixed-income investment,A type of blockchain,B
@@ -166,6 +170,27 @@ const StatCard = ({ title, value, icon }: { title: string; value: string | numbe
 
 export default function AcademyPage() {
   const { currentLevel, experience, flowTokens, modulesCompleted, totalModules, nft, modules } = academyData
+  const { isAuthenticated } = useAuth()
+  const { hasPassedModule, hasUserMintedCertificate, getUserCertificates } = useAcademyContracts()
+
+  // Get dynamic completion status if user is authenticated
+  const getModuleCompletion = (moduleId: string) => {
+    if (!isAuthenticated) return false
+    return hasPassedModule(moduleId)
+  }
+
+  const getModuleCertificateStatus = (moduleId: string) => {
+    if (!isAuthenticated) return false
+    return hasUserMintedCertificate(moduleId)
+  }
+
+  // Calculate dynamic stats for authenticated users
+  const dynamicModulesCompleted = isAuthenticated 
+    ? modules.filter(module => getModuleCompletion(module.id)).length
+    : modulesCompleted
+
+  const userCertificates = isAuthenticated ? getUserCertificates() : []
+  const totalCertificates = userCertificates.filter(id => id > 0).length
 
   return (
     <div className="min-h-screen bg-white">
@@ -184,9 +209,16 @@ export default function AcademyPage() {
           {/* Kept purple for variety or change to metallic-green */}
           <StatCard
             title="Modules"
-            value={`${modulesCompleted}/${totalModules}`}
+            value={`${dynamicModulesCompleted}/${totalModules}`}
             icon={<BookOpen className="h-8 w-8 text-metallic-green" />}
           />
+          {isAuthenticated && (
+            <StatCard
+              title="NFT Certificates"
+              value={totalCertificates}
+              icon={<Medal className="h-8 w-8 text-purple-500" />}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -225,23 +257,42 @@ export default function AcademyPage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {modules.map((quizModule) => (
-                <Link key={quizModule.id} href={`/academy/module/${quizModule.id}`} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors border border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md">
-
+              {modules.map((quizModule) => {
+                const isCompleted = getModuleCompletion(quizModule.id)
+                const hasCertificate = getModuleCertificateStatus(quizModule.id)
+                
+                return (
+                  <Link 
+                    key={quizModule.id} 
+                    href={`/academy/module/${quizModule.id}`} 
+                    className="flex items-center justify-between p-4 bg-gray-50 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors border border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
+                  >
                     <div>
-                      <p className="font-semibold text-gray-700">{quizModule.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-gray-700">{quizModule.title}</p>
+                        {hasCertificate && (
+                          <Medal className="h-4 w-4 text-purple-500" title="Certificate NFT earned" />
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">
                         Level {quizModule.level} - {quizModule.questions.length} questions
                       </p>
+                      {isCompleted && (
+                        <p className="text-xs text-metallic-green font-medium">
+                          ✅ Passed {hasCertificate ? '• NFT Earned' : '• Certificate Available'}
+                        </p>
+                      )}
                     </div>
-                    {quizModule.completed ? (
-                      <CheckCircle className="h-6 w-6 text-metallic-green" />
-                    ) : (
-                      <Circle className="h-6 w-6 text-gray-300" />
-                    )}
-
-                </Link>
-              ))}
+                    <div className="flex items-center gap-2">
+                      {isCompleted ? (
+                        <CheckCircle className="h-6 w-6 text-metallic-green" />
+                      ) : (
+                        <Circle className="h-6 w-6 text-gray-300" />
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
             </CardContent>
           </Card>
         </div>

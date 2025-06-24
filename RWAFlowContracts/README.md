@@ -1,6 +1,6 @@
 # Flow Passport Smart Contracts
 
-Flow Passport's smart contract suite is a comprehensive **DeFi infrastructure** built on Flow EVM, featuring tokenized asset marketplace functionality and platform reward systems. The contracts are designed for secure, efficient, and scalable Real World Asset (RWA) tokenization and trading.
+Flow Passport's smart contract suite is a comprehensive **DeFi infrastructure** built on Flow EVM, featuring tokenized asset marketplace functionality, platform reward systems, and an **NFT certification system** for educational achievements. The contracts are designed for secure, efficient, and scalable Real World Asset (RWA) tokenization and educational credentialing.
 
 ## 🏗️ Smart Contract Architecture
 
@@ -14,33 +14,44 @@ graph TB
             C[AssetMarketplace<br/>Contract] --> D[Asset Ownership]
             C --> E[USD/FLOW Conversion]
             C --> F[Payment Processing]
+            G[AcademyCertification<br/>Contract] --> H[Exam Results]
+            I[AcademyNFT<br/>Contract] --> J[Certificate NFTs]
+            G --> I
         end
         
         subgraph "OpenZeppelin Security"
-            G[ERC20] --> A
-            H[Ownable] --> A
-            I[ERC20Burnable] --> A
-            J[ReentrancyGuard] --> C
-            K[Ownable] --> C
+            K[ERC20] --> A
+            L[Ownable] --> A
+            M[ERC20Burnable] --> A
+            N[ReentrancyGuard] --> C
+            O[Ownable] --> C
+            P[ERC721] --> I
+            Q[ERC721URIStorage] --> I
+            R[Ownable] --> G
+            S[Ownable] --> I
         end
         
         subgraph "Flow Infrastructure"
-            L[FlowScan Explorer] --> M[Contract Verification]
-            N[Flow Testnet RPC] --> O[Transaction Processing]
+            T[FlowScan Explorer] --> U[Contract Verification]
+            V[Flow Testnet RPC] --> W[Transaction Processing]
         end
     end
     
     subgraph "External Integrations"
-        P[Frontend dApp] --> C
-        P --> A
-        Q[Hardhat Deployment] --> R[Contract Deployment]
-        S[Environment Config] --> T[Network Selection]
+        X[Frontend dApp] --> C
+        X --> A
+        X --> G
+        X --> I
+        Y[Hardhat Deployment] --> Z[Contract Deployment]
+        AA[Environment Config] --> BB[Network Selection]
     end
     
-    C --> L
-    A --> L
-    R --> N
-    T --> N
+    C --> T
+    A --> T
+    G --> T
+    I --> T
+    Z --> V
+    BB --> V
 ```
 
 ### Contract Interaction Architecture
@@ -80,21 +91,27 @@ graph TD
 RWAFlowContracts/
 ├── contracts/                    # 📜 Smart Contract Source Files
 │   ├── RWAFlow.sol              # 🪙 ERC20 Platform Token
-│   ├── AssetMarketplace.sol     # 🏪 Original Marketplace Contract
-│   └── AssetMarketplaceV2.sol   # ⚡ Enhanced Marketplace (Future)
+│   ├── AssetMarketplace.sol     # 🏪 Asset Marketplace Contract
+│   ├── AssetMarketplaceV2.sol   # ⚡ Enhanced Marketplace (Future)
+│   ├── AcademyCertification.sol # 🎓 Exam Results & Pass/Fail Tracking
+│   └── AcademyNFT.sol           # 🏅 Soulbound Certificate NFTs
 ├── scripts/                     # 🔧 Deployment & Management Scripts
 │   ├── deploy.js                # 🚀 RWAFlow token deployment
 │   ├── deploy-marketplace.js    # 🚀 Marketplace deployment
+│   ├── deploy-academy.js        # 🚀 Academy certification system deployment
 │   ├── verify.js                # ✅ Manual contract verification
 │   ├── verify-marketplace.js    # ✅ Marketplace verification
+│   ├── verify-academy.js        # ✅ Academy contracts verification
 │   ├── check-marketplace.js     # 📊 Contract status inspection
-│   └── test-purchase.js         # 🧪 Asset purchase testing
+│   ├── test-purchase.js         # 🧪 Asset purchase testing
+│   └── test-academy.js          # 🧪 Academy system testing
 ├── artifacts/                   # 📦 Compiled Contract Artifacts
 ├── cache/                       # 💾 Compilation Cache
 ├── hardhat.config.js           # ⚙️ Network & Build Configuration
 ├── package.json                # 📋 Dependencies & Scripts
 ├── README.md                   # 📖 This Documentation
-└── DEPLOYMENT.md               # 🚀 Deployment Guide
+├── DEPLOYMENT.md               # 🚀 Marketplace Deployment Guide
+└── ACADEMY_DEPLOYMENT.md       # 🎓 Academy NFT System Guide
 ```
 
 ## 🎯 Smart Contract Features
@@ -146,6 +163,65 @@ contract AssetMarketplace is Ownable, ReentrancyGuard {
 | 3 | Brazil Coffee Loan | $200 | 600 FLOW | Commodities |
 | 4 | Green Energy Bond | $1,000 | 3,000 FLOW | ESG Investment |
 | 5 | Corporate Debt Fund | $750 | 2,250 FLOW | Fixed Income |
+
+### 🎓 Academy Certification Contracts
+
+#### AcademyCertification Contract
+**Contract Address**: `0x66206f19Ca68C1B6286673ED3E7500AD50827df2` (Flow Testnet)
+
+```solidity
+contract AcademyCertification is Ownable {
+    enum ModuleLevel { BEGINNER, INTERMEDIATE, ADVANCED }
+    
+    struct ExamResult {
+        uint256 score;
+        uint256 totalQuestions;
+        uint256 timestamp;
+        bool passed; // true if score >= 50%
+    }
+    
+    function submitExamResult(address user, ModuleLevel moduleLevel, uint256 score, uint256 totalQuestions) external onlyOwner;
+    function hasPassedModule(address user, ModuleLevel moduleLevel) external view returns (bool);
+}
+```
+
+**Key Features**:
+- **Exam Tracking**: Records scores, timestamps, and pass/fail status
+- **50% Pass Threshold**: Automatic pass determination for scores ≥ 50%
+- **Module Levels**: BEGINNER (10 questions), INTERMEDIATE (25), ADVANCED (25)
+- **Owner Controls**: Only contract owner can submit exam results
+
+#### AcademyNFT Contract
+**Contract Address**: `0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B` (Flow Testnet)
+
+```solidity
+contract AcademyNFT is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard {
+    struct CertificateInfo {
+        address recipient;
+        ModuleLevel moduleLevel;
+        uint256 score;
+        uint256 totalQuestions;
+        uint256 timestamp;
+        string metadataURI;
+    }
+    
+    function mintCertificate(ModuleLevel moduleLevel) external nonReentrant;
+    function hasUserMintedCertificate(address user, ModuleLevel moduleLevel) external view returns (bool);
+}
+```
+
+**Key Features**:
+- **Soulbound NFTs**: Non-transferable certificate NFTs
+- **Pass Verification**: Only users who passed exams can mint
+- **Duplicate Prevention**: One certificate per module per user
+- **Rich Metadata**: Includes score, percentage, and completion timestamp
+
+**Academy Module Structure**:
+| Module | Level | Questions | Pass Threshold | Certificate NFT |
+|--------|-------|-----------|----------------|-----------------|
+| Beginner RWA Quiz | 0 | 10 | 5+ (50%) | Beginner Certificate |
+| Intermediate RWA Quiz | 1 | 25 | 13+ (50%) | Intermediate Certificate |
+| Advanced RWA Quiz | 2 | 25 | 13+ (50%) | Advanced Certificate |
 
 ## 🔄 Contract Interaction Flows
 
@@ -349,14 +425,21 @@ npm run deploy:testnet
 # Deploy AssetMarketplace to testnet  
 npm run deploy:marketplace
 
+# Deploy Academy certification system
+npm run deploy:academy
+
 # Verify contracts on FlowScan
 npm run verify:marketplace <CONTRACT_ADDRESS>
+npm run verify:academy <CERTIFICATION_ADDRESS> <NFT_ADDRESS>
 
 # Check marketplace contract status
 npm run check:marketplace
 
 # Test asset purchase functionality
 npm run test:purchase <CONTRACT_ADDRESS> <ASSET_ID>
+
+# Test academy certification system
+npm run test:academy <CERTIFICATION_ADDRESS> <NFT_ADDRESS>
 
 # Run comprehensive tests
 npm test
@@ -499,11 +582,17 @@ npx hardhat verify --network flowTestnet \
 |----------|---------|--------|----------|
 | RWAFlow Token | `0x6fBD4A26B44046716e37cD93Db5c47832E276AeB` | ✅ Verified | [View](https://evm-testnet.flowscan.io/address/0x6fBD4A26B44046716e37cD93Db5c47832E276AeB) |
 | AssetMarketplace | `0xc7403912b47Bd062E1933D40027088ACD5066deD` | ✅ Verified | [View](https://evm-testnet.flowscan.io/address/0xc7403912b47Bd062E1933D40027088ACD5066deD) |
+| AcademyCertification | `0x66206f19Ca68C1B6286673ED3E7500AD50827df2` | ✅ Verified | [View](https://evm-testnet.flowscan.io/address/0x66206f19Ca68C1B6286673ED3E7500AD50827df2) |
+| AcademyNFT | `0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B` | ✅ Verified | [View](https://evm-testnet.flowscan.io/address/0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B) |
 
 ### Contract Owner
 - **Address**: `0xd4af2053496Da8809BF69FF2A96E86831A8b2b62`
-- **Role**: Administrative control for both contracts
-- **Permissions**: Token minting, asset management, rate updates
+- **Role**: Administrative control for all contracts
+- **Permissions**: 
+  - Token minting and reward distribution
+  - Asset management and rate updates
+  - Exam result submission
+  - Academy system administration
 
 ## 🔧 Troubleshooting
 

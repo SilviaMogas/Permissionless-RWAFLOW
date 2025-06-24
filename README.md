@@ -32,10 +32,11 @@ Flow Passport/
 
 ## 🚀 Core Features
 
-### 🎓 Educational Platform
+### 🎓 Educational Platform with NFT Certification
 - **Gamified Learning**: Interactive quizzes with immediate feedback
-- **Progressive Curriculum**: Structured learning paths from basics to advanced DeFi
-- **Achievement System**: Points and rewards for educational milestones
+- **Progressive Curriculum**: 3-level structured learning (Beginner → Intermediate → Advanced)
+- **NFT Certificates**: Soulbound certificate NFTs for users who pass with 50%+ scores
+- **Achievement System**: Blockchain-verified completion status and rewards
 - **Personalized Content**: AI-driven recommendations based on user progress
 
 ### 🤖 AI-Powered Investment Engine
@@ -97,10 +98,26 @@ Flow Passport/
 
 ### Flow Passport Identity System
 - **Digital Identity**: Unified profile across all platform features
-- **Education Tracking**: Progress monitoring and achievement records
+- **Education Tracking**: Blockchain-verified progress and NFT certificates
 - **Investment History**: Complete portfolio and transaction history
-- **Reputation System**: Community-driven credibility scoring
+- **Reputation System**: Community-driven credibility scoring with on-chain achievements
 - **Cross-Platform Integration**: Compatible with major DeFi protocols
+
+### Academy NFT Certification System
+A comprehensive certification system that rewards educational achievement:
+
+| Module | Level | Questions | Pass Rate | Certificate NFT |
+|--------|-------|-----------|-----------|-----------------|
+| Beginner RWA Quiz | 1 | 10 | 50%+ | Beginner Certificate |
+| Intermediate RWA Quiz | 2 | 25 | 50%+ | Intermediate Certificate |
+| Advanced RWA Quiz | 3 | 25 | 50%+ | Advanced Certificate |
+
+**Features**:
+- Soulbound (non-transferable) certificate NFTs
+- Automatic exam result submission to blockchain
+- Real-time pass/fail verification
+- Visual completion indicators in UI
+- Prevents duplicate certificates per module
 
 ### Asset Marketplace
 Currently featuring 5 premium tokenized assets:
@@ -124,11 +141,25 @@ Currently featuring 5 premium tokenized assets:
 - `getUserAssets()`: Retrieve user's complete portfolio
 - Asset pricing with automatic USD/FLOW conversion (1 USD = 3 FLOW)
 
-**Security Features**:
-- ReentrancyGuard protection
-- Owner-controlled administrative functions
-- Comprehensive event logging
-- Safe payment handling with automatic routing
+### Academy Certification Contracts
+
+#### AcademyCertification Contract
+**Address**: `0x66206f19Ca68C1B6286673ED3E7500AD50827df2` (Flow Testnet)
+
+**Core Functions**:
+- `submitExamResult()`: Record exam scores and pass/fail status
+- `hasPassedModule()`: Check if user passed a specific module
+- `getExamResult()`: Retrieve detailed exam results
+- `getUserPassedModules()`: Get all passed modules for a user
+
+#### AcademyNFT Contract
+**Address**: `0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B` (Flow Testnet)
+
+**Core Functions**:
+- `mintCertificate()`: Mint soulbound certificate NFT for passed modules
+- `hasUserMintedCertificate()`: Check if user already has certificate
+- `canMintCertificate()`: Verify minting eligibility
+- `getUserCertificates()`: Get all user's certificate token IDs
 
 ### RWAFlow Token (RWAF)
 **Address**: `0x6fBD4A26B44046716e37cD93Db5c47832E276AeB` (Flow Testnet)
@@ -138,6 +169,13 @@ Currently featuring 5 premium tokenized assets:
 - **Initial Supply**: 100,000,000 RWAF (100 million)
 - **Use Cases**: Platform rewards, governance, premium features
 - **Burn Mechanism**: Deflationary tokenomics through usage
+
+### Security Features (All Contracts)
+- **OpenZeppelin Standards**: Battle-tested security patterns
+- **ReentrancyGuard Protection**: Prevents reentrancy attacks
+- **Owner Controls**: Administrative functions restricted to contract owners
+- **Soulbound NFTs**: Academy certificates are non-transferable
+- **Duplicate Prevention**: One certificate per module per user
 
 ## 🚀 Quick Start Guide
 
@@ -179,8 +217,11 @@ cp .env.example .env
 # Compile contracts
 npm run compile
 
-# Deploy to Flow Testnet
+# Deploy marketplace contracts
 npm run deploy:marketplace
+
+# Deploy academy certification system
+npm run deploy:academy
 ```
 
 ### Environment Configuration
@@ -190,6 +231,10 @@ npm run deploy:marketplace
 # Contract addresses
 NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS=0xc7403912b47Bd062E1933D40027088ACD5066deD
 NEXT_PUBLIC_RWAFLOW_TOKEN_ADDRESS=0x6fBD4A26B44046716e37cD93Db5c47832E276AeB
+
+# Academy contracts
+NEXT_PUBLIC_ACADEMY_CERTIFICATION_ADDRESS=0x66206f19Ca68C1B6286673ED3E7500AD50827df2
+NEXT_PUBLIC_ACADEMY_NFT_ADDRESS=0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B
 
 # Flow network configuration
 NEXT_PUBLIC_FLOW_TESTNET_RPC=https://testnet.evm.nodes.onflow.org
@@ -223,6 +268,9 @@ npm run check:marketplace
 
 # Test asset purchase functionality
 npm run test:purchase <CONTRACT_ADDRESS> <ASSET_ID>
+
+# Test academy certification system
+npm run test:academy <CERTIFICATION_ADDRESS> <NFT_ADDRESS>
 ```
 
 ### Frontend Testing
@@ -285,6 +333,7 @@ npx hardhat verify --network flowTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
 ## 🛣️ Roadmap
 
 ### Q1 2025
+- [x] NFT Certification System for Academy modules
 - [ ] Enhanced AI investment recommendations
 - [ ] Additional tokenized asset categories
 - [ ] Multi-language platform support
