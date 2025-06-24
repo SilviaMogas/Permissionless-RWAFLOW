@@ -20,10 +20,13 @@ COPY . .
 
 # Set dummy environment variables for build
 ENV NEXT_PUBLIC_PRIVY_APP_ID=dummy-build-value
+ENV NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000
+ENV NEXT_PUBLIC_FLOW_TESTNET_RPC=https://testnet.evm.nodes.onflow.org
+ENV NEXT_PUBLIC_FLOW_TESTNET_CHAIN_ID=545
 ENV NODE_ENV=production
 
-# Build the application with skip build static optimization for pages that require runtime env vars
-RUN NEXT_PUBLIC_PRIVY_APP_ID=dummy-build-value npm run build
+# Build the application
+RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner

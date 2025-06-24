@@ -1,0 +1,101 @@
+# Defines the version of the configuration format
+version: 0.1
+
+# Services are a collection of workloads that work together
+services:
+  # Defines a workload named 'flowpassport'
+  flowpassport:
+    # Specify the container image name; Make sure image is public
+    image: ebusinessms/flow_passport_template:v2
+
+    # Determines when to fetch the latest version of the workload
+    imagePullPolicy: Always
+
+    # Defines the command to run; empty by default
+    command: []
+
+    # Specifies arguments for the command; empty by default
+    args: []
+
+    # Defines network-related settings
+    ports:
+      - containerPort: 3000 # The port on which the service will be available
+        protocol: TCP # The protocol used for communication
+        expose: true # This will generate the URL for the service, so it can be accessed from the internet
+
+    # Defines environment variables for the workload
+    env:
+      # Privy Configuration
+      - name: NEXT_PUBLIC_PRIVY_APP_ID
+        value: "{{.NEXT_PUBLIC_PRIVY_APP_ID}}"
+        default: "dummy-build-value"
+
+      # Flow AgentKit Configuration
+      - name: ANTHROPIC_API_KEY
+        value: "{{.ANTHROPIC_API_KEY}}"
+        default: "your_anthropic_api_key_here"
+
+      # Flow Blockchain Configuration
+      - name: FLOW_TESTNET_RPC_URL
+        value: "{{.FLOW_TESTNET_RPC_URL}}"
+        default: "https://testnet.evm.nodes.onflow.org"
+
+      - name: FLOW_MAINNET_RPC_URL
+        value: "{{.FLOW_MAINNET_RPC_URL}}"
+        default: "https://mainnet.evm.nodes.onflow.org"
+
+      - name: FLOW_PRIVATE_KEY
+        value: "{{.FLOW_PRIVATE_KEY}}"
+        default: "your_flow_private_key_here"
+
+      # Agent Configuration
+      - name: AGENT_MODEL
+        value: "{{.AGENT_MODEL}}"
+        default: "claude-3-5-haiku-20241022"
+
+      - name: AGENT_TEMPERATURE
+        value: "{{.AGENT_TEMPERATURE}}"
+        default: "0.1"
+
+      - name: AGENT_MAX_TOKENS
+        value: "{{.AGENT_MAX_TOKENS}}"
+        default: "1000"
+
+      # USD to FLOW conversion rate
+      - name: USD_TO_FLOW_RATE
+        value: "{{.USD_TO_FLOW_RATE}}"
+        default: "3"
+
+      # Asset Marketplace Contract Address
+      - name: NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS
+        value: "{{.NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS}}"
+        default: "0x0000000000000000000000000000000000000000"
+
+      # Flow Network Configuration
+      - name: NEXT_PUBLIC_FLOW_TESTNET_RPC
+        value: "{{.NEXT_PUBLIC_FLOW_TESTNET_RPC}}"
+        default: "https://testnet.evm.nodes.onflow.org"
+
+      - name: NEXT_PUBLIC_FLOW_TESTNET_CHAIN_ID
+        value: "{{.NEXT_PUBLIC_FLOW_TESTNET_CHAIN_ID}}"
+        default: "545"
+
+      # Node.js Environment
+      - name: NODE_ENV
+        value: "{{.NODE_ENV}}"
+        default: "production"
+
+    # Specifies the minimum resource allocation
+    # This also specify the template price
+    resourceUsage:
+      idle:
+        cpu: 200 # CPU allocation (likely in millicores, meaning 0.2 cores)
+        memory: 400 # Memory allocation (likely in MB)
+
+
+  ######## Constraints ########
+  # 1. Maximum 5 services can be deployed.
+  # 2. CU = max(total CPU, total Memory); Max 4 CUs can be deployed.
+  # 3. One service can be expose outside the world.
+  # 4. In upgrade template does not allow to add service(s) / update service(s) resources.
+  ######## Constraints ########
