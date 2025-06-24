@@ -520,6 +520,105 @@ Ensure all required environment variables are configured:
 - [ ] SSL certificates installed
 - [ ] Error monitoring configured
 
+## 🐳 Containerized Deployment with NodeOps
+
+### Docker Support
+The application includes a production-ready Dockerfile optimized for Next.js deployment:
+
+```dockerfile
+# Multi-stage build for optimized image size
+FROM node:18-alpine AS base
+FROM base AS deps    # Dependencies installation
+FROM base AS builder # Application build with dummy env vars
+FROM base AS runner  # Production runtime
+```
+
+### Key Docker Features
+- **Multi-stage build**: Optimized for production deployment
+- **Security**: Runs as non-root user (`nextjs:nodejs`)
+- **Environment variables**: Secure handling with dummy build values
+- **Port configuration**: Exposes port 3000 for Next.js application
+- **Alpine Linux**: Lightweight base image for reduced attack surface
+
+### Building the Docker Image
+```bash
+# Build and push to Docker Hub
+docker build -t ebusinessms/flow_passport_template:v2 . --push --platform linux/amd64
+
+# Run locally for testing
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_PRIVY_APP_ID=your_real_app_id \
+  -e ANTHROPIC_API_KEY=your_real_api_key \
+  ebusinessms/flow_passport_template:v2
+```
+
+### NodeOps Deployment
+The application is pre-configured for deployment on **NodeOps**, a containerized deployment platform:
+
+#### Configuration File (`nodeops.yaml`)
+```yaml
+version: 0.1
+services:
+  flowpassport:
+    image: ebusinessms/flow_passport_template:v2
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 3000
+        protocol: TCP
+        expose: true
+    
+    # Dynamic environment variable substitution
+    env:
+      - name: NEXT_PUBLIC_PRIVY_APP_ID
+        value: "{{.NEXT_PUBLIC_PRIVY_APP_ID}}"
+        default: "dummy-build-value"
+      
+      - name: ANTHROPIC_API_KEY
+        value: "{{.ANTHROPIC_API_KEY}}"
+        default: "your_anthropic_api_key_here"
+      
+      # ... additional environment variables
+```
+
+#### NodeOps Features
+- **Dynamic environment variables**: Use `{{.VARIABLE_NAME}}` syntax for runtime substitution
+- **Automatic scaling**: Lightweight resource allocation (200m CPU, 400MB RAM)
+- **Public exposure**: Automatic URL generation for internet access
+- **Secure defaults**: All sensitive values have safe fallback defaults
+
+#### Deployment Process
+1. **Configure environment**: Set real values for production variables
+2. **Deploy with NodeOps**: Use the `nodeops.yaml` configuration
+3. **Access application**: Get auto-generated public URL
+4. **Monitor performance**: Built-in resource monitoring
+
+#### Security Considerations
+- **Build-time safety**: Dockerfile uses dummy values during build
+- **Runtime security**: Real values injected only at deployment
+- **No exposed secrets**: Sensitive data never stored in image layers
+- **Environment isolation**: Each deployment has isolated environment variables
+
+### Container Environment Variables
+All environment variables from `.env.example` are supported in containerized deployment:
+
+| Variable | Purpose | Default in Container |
+|----------|---------|---------------------|
+| `NEXT_PUBLIC_PRIVY_APP_ID` | Authentication | `dummy-build-value` |
+| `ANTHROPIC_API_KEY` | AI Features | `your_anthropic_api_key_here` |
+| `FLOW_PRIVATE_KEY` | Blockchain | `your_flow_private_key_here` |
+| `NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS` | Smart Contracts | `0x0000...0000` |
+| `USD_TO_FLOW_RATE` | Exchange Rate | `3` |
+
+### Production Deployment Example
+```bash
+# Deploy with real environment variables
+nodeops deploy \
+  --env NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id \
+  --env ANTHROPIC_API_KEY=your_anthropic_api_key \
+  --env FLOW_PRIVATE_KEY=your_flow_private_key \
+  --config nodeops.yaml
+```
+
 ## 🤝 Contributing
 
 ### Development Guidelines
