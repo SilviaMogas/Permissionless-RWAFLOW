@@ -1,10 +1,14 @@
+"use client"
+
 import Header from "@/components/header"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Play } from "lucide-react"
+import { Play, CheckCircle, Medal } from "lucide-react"
 import type { LearningModule, QuizQuestion } from "@/app/academy/module/[moduleId]/types"
+import { useAcademyContracts } from "@/hooks/use-academy-contracts"
+import { useAuth } from "@/hooks/use-auth"
 
 // --- CSV data and parsing function (same as used in other academy pages) ---
 const csvData = `Level,Question,Option A,Option B,Option C,Correct Answer
@@ -144,6 +148,19 @@ function parseCSVToQuizzes(csv: string): LearningModule[] {
 const quizzesToList = parseCSVToQuizzes(csvData)
 
 export default function LearningModulesPage() {
+  const { isAuthenticated } = useAuth()
+  const { hasPassedModule, hasUserMintedCertificate } = useAcademyContracts()
+
+  const getModuleCompletion = (moduleId: string) => {
+    if (!isAuthenticated) return false
+    return hasPassedModule(moduleId)
+  }
+
+  const getModuleCertificateStatus = (moduleId: string) => {
+    if (!isAuthenticated) return false
+    return hasUserMintedCertificate(moduleId)
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -156,34 +173,58 @@ export default function LearningModulesPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {quizzesToList.map((quizModule) => (
-            <Card
-              key={quizModule.id}
-              className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow border-gray-200"
-            >
-              <CardHeader>
-                <Badge variant="outline" className="w-fit bg-emerald-50 text-metallic-green border-emerald-200 mb-2">
-                  Level {quizModule.level}
-                </Badge>
-                <CardTitle className="text-xl text-gray-800">{quizModule.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-gray-600 mb-3">{quizModule.description}</p>
-                <p className="text-xs text-gray-500">
-                  {quizModule.questions.length} question{quizModule.questions.length !== 1 ? "s" : ""}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  asChild
-                  className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
-                >
-                  <Link href={`/academy/module/${quizModule.id}`}>
-                    <Play className="mr-2 h-4 w-4" /> Start Quiz
-                  </Link>
-                </Button>              </CardFooter>
-            </Card>
-          ))}
+          {quizzesToList.map((quizModule) => {
+            const isCompleted = getModuleCompletion(quizModule.id)
+            const hasCertificate = getModuleCertificateStatus(quizModule.id)
+            
+            return (
+              <Card
+                key={quizModule.id}
+                className="flex flex-col bg-white shadow-lg hover:shadow-xl transition-shadow border-gray-200 relative"
+              >
+                {isCompleted && (
+                  <div className="absolute top-4 right-4 flex items-center gap-1">
+                    <CheckCircle className="h-5 w-5 text-metallic-green" />
+                    {hasCertificate && (
+                      <Medal className="h-5 w-5 text-purple-500" title="Certificate NFT earned" />
+                    )}
+                  </div>
+                )}
+                
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit bg-emerald-50 text-metallic-green border-emerald-200 mb-2">
+                    Level {quizModule.level}
+                  </Badge>
+                  <CardTitle className="text-xl text-gray-800 pr-12">{quizModule.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-gray-600 mb-3">{quizModule.description}</p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    {quizModule.questions.length} question{quizModule.questions.length !== 1 ? "s" : ""}
+                  </p>
+                  {isCompleted && (
+                    <div className="flex items-center gap-1 text-xs">
+                      <span className="text-metallic-green font-medium">✅ Completed</span>
+                      {hasCertificate && (
+                        <span className="text-purple-600 font-medium">• NFT Earned</span>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    asChild
+                    className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
+                  >
+                    <Link href={`/academy/module/${quizModule.id}`}>
+                      <Play className="mr-2 h-4 w-4" /> 
+                      {isCompleted ? 'Retake Quiz' : 'Start Quiz'}
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
         </div>
       </main>
     </div>

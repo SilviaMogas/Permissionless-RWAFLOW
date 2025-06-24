@@ -5,8 +5,11 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { X, Clock, Award, Check, AlertTriangle } from "lucide-react"
+import { X, Clock, Award, Check, AlertTriangle, Gift, Loader2, Star } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAcademyContracts } from "@/hooks/use-academy-contracts"
+import { useAuth } from "@/hooks/use-auth"
+import { toast } from "sonner"
 
 interface QuizInterfaceProps {
   module: LearningModule
@@ -21,8 +24,23 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
   const [showResults, setShowResults] = useState(false)
   const [isAnswerConfirmed, setIsAnswerConfirmed] = useState(false)
+  const [hasSubmittedExam, setHasSubmittedExam] = useState(false)
+  const [showNFTMinting, setShowNFTMinting] = useState(false)
 
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
+  const {
+    submitExamResult,
+    mintCertificate,
+    hasPassedModule,
+    canMintCertificate,
+    hasUserMintedCertificate,
+    isSubmittingExam,
+    isMintingNFT,
+    examSubmissionSuccess,
+    nftMintingSuccess
+  } = useAcademyContracts()
+  
   const currentQuestion = module.questions[currentQuestionIndex]
 
   const resetTimer = useCallback(() => {
@@ -69,8 +87,51 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
 
   const xpEarned = score * 10
   const tokensEarned = score * 5
+  const percentage = Math.round((score / module.questions.length) * 100)
+  const isPassed = percentage >= 50
+  const moduleId = module.id
+
+  // Handle exam submission when results are shown
+  useEffect(() => {
+    if (showResults && !hasSubmittedExam && isAuthenticated) {
+      const submitExam = async () => {
+        try {
+          await submitExamResult(moduleId, score, module.questions.length)
+          setHasSubmittedExam(true)
+          
+          // Show NFT minting option if passed
+          if (isPassed) {
+            setTimeout(() => setShowNFTMinting(true), 2000)
+          }
+        } catch (error) {
+          console.error('Failed to submit exam result:', error)
+        }
+      }
+      submitExam()
+    }
+  }, [showResults, hasSubmittedExam, isAuthenticated, submitExamResult, moduleId, score, module.questions.length, isPassed])
+
+  // Handle successful NFT minting
+  useEffect(() => {
+    if (nftMintingSuccess) {
+      toast.success('🎉 Certificate NFT minted successfully!')
+      setShowNFTMinting(false)
+    }
+  }, [nftMintingSuccess])
+
+  const handleMintCertificate = async () => {
+    try {
+      await mintCertificate(moduleId)
+    } catch (error) {
+      console.error('Failed to mint certificate:', error)
+    }
+  }
 
   if (showResults) {
+    const alreadyHasCertificate = hasUserMintedCertificate(moduleId)
+    const canMint = canMintCertificate(moduleId)
+    const userHasPassed = hasPassedModule(moduleId)
+
     return (
       <Card className="w-full max-w-lg shadow-xl bg-white border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -80,16 +141,103 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
           </Button>
         </CardHeader>
         <CardContent className="text-center py-10">
-          <Award className="h-24 w-24 text-yellow-400 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-gray-800 mb-3">Quiz Completed!</h2>
+          {isPassed ? (
+            <div className="mb-6">
+              <Star className="h-24 w-24 text-yellow-400 mx-auto mb-4" />
+              <div className="text-6xl mb-2">🎉</div>
+            </div>
+          ) : (
+            <Award className="h-24 w-24 text-gray-400 mx-auto mb-6" />
+          )}
+          
+          <h2 className={`text-3xl font-bold mb-3 ${isPassed ? 'text-metallic-green' : 'text-gray-600'}`}>
+            {isPassed ? 'Congratulations!' : 'Quiz Completed'}
+          </h2>
+          
           <p className="text-xl text-gray-700 mb-2">
-            Your Score: {score} / {module.questions.length}
+            Your Score: {score} / {module.questions.length} ({percentage}%)
           </p>
+          
+          {isPassed ? (
+            <p className="text-lg text-metallic-green font-semibold mb-4">
+              ✅ You passed! (50% or higher required)
+            </p>
+          ) : (
+            <p className="text-lg text-red-600 font-semibold mb-4">
+              ❌ You need 50% or higher to pass
+            </p>
+          )}
+
+          {isAuthenticated && (
+            <div className="my-6 space-y-3">
+              {isSubmittingExam && (
+                <div className="flex items-center justify-center space-x-2 text-blue-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Submitting exam result...</span>
+                </div>
+              )}
+              
+              {examSubmissionSuccess && (
+                <div className="text-metallic-green font-semibold">
+                  ✅ Exam result saved to blockchain!
+                </div>
+              )}
+
+              {isPassed && isAuthenticated && showNFTMinting && (
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                  <Gift className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                  <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                    Claim Your Certificate NFT!
+                  </h3>
+                  <p className="text-sm text-purple-600 mb-3">
+                    You've earned a soulbound certificate NFT for passing this module.
+                  </p>
+                  
+                  {alreadyHasCertificate ? (
+                    <div className="text-metallic-green font-semibold">
+                      ✅ Certificate already minted!
+                    </div>
+                  ) : canMint ? (
+                    <Button
+                      onClick={handleMintCertificate}
+                      disabled={isMintingNFT}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      {isMintingNFT ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Minting NFT...
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="mr-2 h-4 w-4" />
+                          Mint Certificate NFT
+                        </>
+                      )}
+                    </Button>
+                  ) : userHasPassed ? (
+                    <div className="text-gray-600 text-sm">
+                      Certificate already claimed or not available
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isAuthenticated && isPassed && (
+            <div className="my-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm">
+                Connect your wallet to save your progress and claim your certificate NFT!
+              </p>
+            </div>
+          )}
+
           <div className="my-6 space-y-2">
             <p className="text-lg font-semibold text-metallic-green">+{xpEarned} XP Earned</p>
-            <p className="text-lg font-semibold text-purple-600">+{tokensEarned} Flow Tokens</p>{" "}
-            {/* Kept purple for variety */}
+            <p className="text-lg font-semibold text-purple-600">+{tokensEarned} Flow Tokens</p>
           </div>
+          
           <Button
             onClick={handleClose}
             className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"

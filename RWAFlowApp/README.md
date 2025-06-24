@@ -119,6 +119,7 @@ RWAFlowApp/
 ├── hooks/                      # 🎣 Custom React Hooks
 │   ├── use-auth.ts            # Authentication state
 │   ├── use-asset-marketplace.ts # Blockchain interactions
+│   ├── use-academy-contracts.ts # Academy NFT certification system
 │   └── use-toast.ts           # Toast notifications
 ├── lib/                       # 📚 Utility Libraries
 │   ├── agent-config.ts        # AI configuration
@@ -304,11 +305,13 @@ sequenceDiagram
 
 ## 🎯 Key Features
 
-### 🎓 Educational Platform
-- **Interactive Quizzes**: Timed assessments with instant feedback
-- **Progress Tracking**: XP points and achievement system
-- **Adaptive Learning**: AI-powered content recommendations
-- **Certification System**: NFT evolution based on progress
+### 🎓 Educational Platform with NFT Certification
+- **Interactive Quizzes**: Timed assessments with instant feedback and blockchain result submission
+- **NFT Certificates**: Soulbound certificate NFTs for users who pass with 50%+ scores
+- **Progress Tracking**: Blockchain-verified completion status with checkmarks and badges
+- **3-Level Curriculum**: Beginner → Intermediate → Advanced RWA education
+- **Achievement System**: On-chain verification and visual indicators
+- **Real-time Integration**: Automatic exam submission and NFT minting eligibility
 
 ### 🤖 AI-Powered Assistant
 - **Real-time Chat**: Floating bubble interface
@@ -359,6 +362,10 @@ cp .env.example .env
 # Contract Addresses
 NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS=0xc7403912b47Bd062E1933D40027088ACD5066deD
 NEXT_PUBLIC_RWAFLOW_TOKEN_ADDRESS=0x6fBD4A26B44046716e37cD93Db5c47832E276AeB
+
+# Academy NFT Certification Contracts
+NEXT_PUBLIC_ACADEMY_CERTIFICATION_ADDRESS=0x66206f19Ca68C1B6286673ED3E7500AD50827df2
+NEXT_PUBLIC_ACADEMY_NFT_ADDRESS=0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B
 
 # Flow Network
 NEXT_PUBLIC_FLOW_TESTNET_RPC=https://testnet.evm.nodes.onflow.org
@@ -411,12 +418,14 @@ npm run lint
 5. **Portfolio Tracking**: Real-time performance monitoring
 6. **Transaction History**: FlowScan block explorer links
 
-### Learning Experience
-1. **Academy Dashboard**: Module selection
-2. **Quiz Participation**: Interactive timed assessments
-3. **Progress Tracking**: XP points and NFT evolution
-4. **AI Assistance**: Real-time help and guidance
-5. **Achievement System**: Badges and certifications
+### Learning Experience with NFT Certification
+1. **Academy Dashboard**: Module selection with completion indicators
+2. **Quiz Participation**: Interactive timed assessments (30s per question)
+3. **Blockchain Integration**: Automatic exam result submission
+4. **NFT Rewards**: Mint soulbound certificate NFTs for 50%+ scores
+5. **Progress Tracking**: Real-time completion status and badges
+6. **Visual Indicators**: Checkmarks for passed modules, medals for earned NFTs
+7. **AI Assistance**: Real-time help and guidance during learning
 
 ## 🔐 Security Features
 
