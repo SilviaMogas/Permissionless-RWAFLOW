@@ -172,15 +172,13 @@ function PlanDisplay() {
               </Card>
             )}
             
-            <Link href="/marketplace" passHref className="w-full">
-              <Button
-                asChild
-                size="lg"
-                className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
-              >
-                <a>Continue to Marketplace</a>
-              </Button>
-            </Link>
+            <Button
+              asChild
+              size="lg"
+              className="w-full bg-green-gradient text-white hover:opacity-90 transition-opacity shadow-md"
+            >
+              <Link href="/marketplace">Continue to Marketplace</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
