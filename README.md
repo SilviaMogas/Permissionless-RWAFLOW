@@ -113,11 +113,23 @@ A comprehensive certification system that rewards educational achievement:
 | Advanced RWA Quiz | 3 | 25 | 50%+ | Advanced Certificate |
 
 **Features**:
+- **Quiz Locking System**: Completed quizzes are locked to prevent retaking
+- **Final Score Display**: Shows percentage score for passed quizzes (e.g., "Final Score: 85%")
+- **NFT Explorer Integration**: Direct links to view certificate NFTs on FlowScan block explorer
+- **One-Click NFT Minting**: Seamless certificate minting for eligible users
 - Soulbound (non-transferable) certificate NFTs
 - Automatic exam result submission to blockchain
 - Real-time pass/fail verification
 - Visual completion indicators in UI
 - Prevents duplicate certificates per module
+
+**User Experience Enhancements**:
+- **Locked Quiz Display**: Completed quizzes show with reduced opacity and are non-clickable
+- **Score Badges**: Green badges display final scores prominently
+- **NFT Action Buttons**: 
+  - "View NFT in Explorer" button for users who have minted certificates
+  - "Mint Certificate NFT" button for users who passed but haven't minted yet
+- **Smart Status Indicators**: Dynamic status showing pass/fail, NFT availability, and completion status
 
 ### Asset Marketplace
 Currently featuring 5 premium tokenized assets:
@@ -334,6 +346,10 @@ npx hardhat verify --network flowTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
 
 ### Q1 2025
 - [x] NFT Certification System for Academy modules
+- [x] Quiz locking system to prevent retaking completed modules
+- [x] Final score display with percentage badges
+- [x] NFT Explorer integration with FlowScan block explorer
+- [x] One-click NFT certificate minting functionality
 - [ ] Enhanced AI investment recommendations
 - [ ] Additional tokenized asset categories
 - [ ] Multi-language platform support

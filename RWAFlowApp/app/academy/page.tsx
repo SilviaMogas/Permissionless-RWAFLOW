@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle, Medal } from "lucide-react"
+import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle, Medal, ExternalLink, Gift } from "lucide-react"
 import type { QuizQuestion, LearningModule } from "@/app/academy/module/[moduleId]/types"
 import { useAcademyContracts } from "@/hooks/use-academy-contracts"
 import { useAuth } from "@/hooks/use-auth"
@@ -171,7 +171,7 @@ const StatCard = ({ title, value, icon }: { title: string; value: string | numbe
 export default function AcademyPage() {
   const { currentLevel, experience, flowTokens, modulesCompleted, totalModules, nft, modules } = academyData
   const { isAuthenticated } = useAuth()
-  const { hasPassedModule, hasUserMintedCertificate, getUserCertificates } = useAcademyContracts()
+  const { hasPassedModule, hasUserMintedCertificate, getUserCertificates, mintCertificate, canMintCertificate, getExamResult } = useAcademyContracts()
 
   // Get dynamic completion status if user is authenticated
   const getModuleCompletion = (moduleId: string) => {
@@ -191,6 +191,37 @@ export default function AcademyPage() {
 
   const userCertificates = isAuthenticated ? getUserCertificates() : []
   const totalCertificates = userCertificates.filter(id => id > 0).length
+
+  // Helper function to get NFT explorer URL
+  const getNFTExplorerUrl = (moduleId: string) => {
+    // Get the certificate ID for this module
+    const certificates = getUserCertificates()
+    let certificateId = 0
+    
+    if (moduleId === 'beginner-rwa-quiz' && certificates[0] > 0) {
+      certificateId = certificates[0]
+    } else if (moduleId === 'intermediate-rwa-quiz' && certificates[1] > 0) {
+      certificateId = certificates[1]
+    } else if (moduleId === 'advanced-rwa-quiz' && certificates[2] > 0) {
+      certificateId = certificates[2]
+    }
+    
+    if (certificateId > 0) {
+      // Flow Testnet FlowScan explorer URL for NFT using deployed contract address
+      const nftContractAddress = process.env.NEXT_PUBLIC_ACADEMY_NFT_ADDRESS
+      return `https://evm-testnet.flowscan.io/token/${nftContractAddress}/instance/${certificateId}`
+    }
+    return null
+  }
+
+  // Handle NFT minting
+  const handleMintNFT = async (moduleId: string) => {
+    try {
+      await mintCertificate(moduleId)
+    } catch (error) {
+      console.error('Failed to mint NFT:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -260,37 +291,98 @@ export default function AcademyPage() {
               {modules.map((quizModule) => {
                 const isCompleted = getModuleCompletion(quizModule.id)
                 const hasCertificate = getModuleCertificateStatus(quizModule.id)
+                const canMint = isAuthenticated && canMintCertificate(quizModule.id)
+                const nftExplorerUrl = getNFTExplorerUrl(quizModule.id)
+                const examResult = isAuthenticated ? getExamResult(quizModule.id) : null
+                
+                // Calculate percentage score
+                const percentageScore = examResult && examResult.totalQuestions > 0 
+                  ? Math.round((examResult.score / examResult.totalQuestions) * 100)
+                  : null
                 
                 return (
-                  <Link 
-                    key={quizModule.id} 
-                    href={`/academy/module/${quizModule.id}`} 
-                    className="flex items-center justify-between p-4 bg-gray-50 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors border border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-700">{quizModule.title}</p>
-                        {hasCertificate && (
-                          <Medal className="h-4 w-4 text-purple-500" title="Certificate NFT earned" />
-                        )}
+                  <div key={quizModule.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                    {/* Conditional Link - only clickable if not completed */}
+                    {isCompleted ? (
+                      // Locked quiz - not clickable
+                      <div className="flex items-center justify-between p-2 rounded-lg opacity-75">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-700">{quizModule.title}</p>
+                            {hasCertificate && (
+                              <Medal className="h-4 w-4 text-purple-500" title="Certificate NFT earned" />
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            Level {quizModule.level} - {quizModule.questions.length} questions
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-metallic-green font-medium">
+                              ✅ Passed {hasCertificate ? '• NFT Earned' : '• Certificate Available'}
+                            </p>
+                            {percentageScore !== null && (
+                              <span className="text-xs bg-metallic-green text-white px-2 py-1 rounded-full font-medium">
+                                Final Score: {percentageScore}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-6 w-6 text-metallic-green" />
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-500">
-                        Level {quizModule.level} - {quizModule.questions.length} questions
-                      </p>
-                      {isCompleted && (
-                        <p className="text-xs text-metallic-green font-medium">
-                          ✅ Passed {hasCertificate ? '• NFT Earned' : '• Certificate Available'}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isCompleted ? (
-                        <CheckCircle className="h-6 w-6 text-metallic-green" />
-                      ) : (
-                        <Circle className="h-6 w-6 text-gray-300" />
-                      )}
-                    </div>
-                  </Link>
+                    ) : (
+                      // Active quiz - clickable
+                      <Link 
+                        href={`/academy/module/${quizModule.id}`} 
+                        className="flex items-center justify-between hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors hover:border-emerald-300 hover:shadow-md p-2 -m-2"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-700">{quizModule.title}</p>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            Level {quizModule.level} - {quizModule.questions.length} questions
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Circle className="h-6 w-6 text-gray-300" />
+                        </div>
+                      </Link>
+                    )}
+                    
+                    {/* NFT Action Buttons */}
+                    {isAuthenticated && isCompleted && (
+                      <div className="mt-3 flex gap-2">
+                        {hasCertificate ? (
+                          // Show "View NFT" button if user has minted certificate
+                          nftExplorerUrl && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="text-metallic-green border-metallic-green hover:bg-green-50 hover:text-metallic-green bg-transparent"
+                            >
+                              <Link href={nftExplorerUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                View NFT in Explorer
+                              </Link>
+                            </Button>
+                          )
+                        ) : canMint ? (
+                          // Show "Mint NFT" button if user passed but hasn't minted
+                          <Button
+                            onClick={() => handleMintNFT(quizModule.id)}
+                            size="sm"
+                            className="bg-purple-600 text-white hover:bg-purple-700"
+                          >
+                            <Gift className="mr-2 h-4 w-4" />
+                            Mint Certificate NFT
+                          </Button>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </CardContent>
