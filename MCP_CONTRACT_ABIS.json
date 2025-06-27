@@ -1,0 +1,154 @@
+{
+  "contract_abis": {
+    "FlowPassportMembership": {
+      "contract_address": "0x04788614eecB86a9eEF39928D8dafBfAe54476a8",
+      "key_functions": [
+        "function createMembership(address user) external nonReentrant returns (uint256)",
+        "function getMembershipInfo(address user) external view returns (MembershipInfo memory)",
+        "function getMembershipTokenId(address user) external view returns (uint256)",
+        "function hasMembership(address user) external view returns (bool)",
+        "function updateReputationScore(address user, uint256 newScore) external",
+        "function incrementCertificateCount(address user) external",
+        "function incrementAssetCount(address user) external",
+        "function setRegistryContract(address _registryContract) external"
+      ],
+      "events": [
+        "event MembershipCreated(address indexed member, uint256 indexed tokenId, uint256 timestamp)",
+        "event ReputationUpdated(address indexed member, uint256 indexed tokenId, uint256 oldScore, uint256 newScore)"
+      ]
+    },
+    "FlowPassportRegistry": {
+      "contract_address": "0xdf03552Dd7afB410DE95E3c810AB7b39299904E7",
+      "key_functions": [
+        "function createOrLinkMembership(address user) external nonReentrant returns (uint256)",
+        "function addChildNFT(address user, address contractAddress, uint256 tokenId, string memory nftType, string memory metadata) external returns (uint256)",
+        "function getUserProfile(address user) external view returns (UserProfile memory)",
+        "function getCompleteUserProfile(address user) external view returns (UserProfile memory profile, uint256[] memory certificates, uint256[] memory assets)",
+        "function getUserCertificates(address user) external view returns (uint256[] memory)",
+        "function getUserAssets(address user) external view returns (uint256[] memory)",
+        "function authorizeContract(address contractAddress, bool authorized) external",
+        "function getTopUsersByReputation(uint256 limit) external view returns (address[] memory, uint256[] memory)"
+      ],
+      "events": [
+        "event MembershipLinked(address indexed user, uint256 indexed membershipTokenId, uint256 timestamp)",
+        "event ChildNFTAdded(address indexed user, uint256 indexed childNFTId, address indexed contractAddress, uint256 tokenId, string nftType)"
+      ]
+    },
+    "AcademyCertificationV2": {
+      "contract_address": "0x525715A1BcC513F66Eecea513652fc294833ef6C",
+      "key_functions": [
+        "function submitExamResult(address user, ModuleLevel moduleLevel, uint256 score, uint256 totalQuestions) external",
+        "function hasPassedModule(address user, ModuleLevel moduleLevel) external view returns (bool)",
+        "function getExamResult(address user, ModuleLevel moduleLevel) external view returns (ExamResult memory)",
+        "function getUserPassedModules(address user) external view returns (bool[] memory)",
+        "function getPassPercentage(address user, ModuleLevel moduleLevel) external view returns (uint256)",
+        "function getModuleStats(ModuleLevel moduleLevel) external view returns (uint256 participants, uint256 passed, uint256 passRate)"
+      ],
+      "enums": [
+        "enum ModuleLevel { BEGINNER, INTERMEDIATE, ADVANCED }"
+      ],
+      "events": [
+        "event ExamCompleted(address indexed user, ModuleLevel indexed moduleLevel, uint256 score, uint256 totalQuestions, bool passed, uint256 membershipTokenId)"
+      ]
+    },
+    "AssetMarketplaceV2": {
+      "contract_address": "0xc4951B1C022A29b4dCdbB3DE06e5C2f7A5767501",
+      "key_functions": [
+        "function purchaseAsset(string memory assetId) external payable nonReentrant",
+        "function hasAsset(address user, string memory assetId) external view returns (bool)",
+        "function getUserAssets(address user) external view returns (string[] memory)",
+        "function getAssetPriceInFLOW(string memory assetId) external view returns (uint256)",
+        "function getAssetPriceInUSD(string memory assetId) external view returns (uint256)",
+        "function getAllAssetIds() external pure returns (string[] memory)",
+        "function getAllAssetsWithDetails() external view returns (string[] memory assetIds, string[] memory names, uint256[] memory pricesUSD, uint256[] memory pricesFLOW, string[] memory categories, uint256[] memory purchaseCounts)",
+        "function updateConversionRate(uint256 newRate) external"
+      ],
+      "events": [
+        "event AssetPurchased(address indexed user, string indexed assetId, uint256 priceUSD, uint256 priceFLOW, uint256 membershipTokenId)"
+      ],
+      "assets": [
+        {"id": "1", "name": "Lisbon Apartment", "price_usd": 500, "category": "Real Estate"},
+        {"id": "2", "name": "NFT Art Fund", "price_usd": 300, "category": "Digital Assets"},
+        {"id": "3", "name": "Brazil Coffee Loan", "price_usd": 200, "category": "Commodities"},
+        {"id": "4", "name": "Green Energy Bond", "price_usd": 1000, "category": "ESG Investment"},
+        {"id": "5", "name": "Corporate Debt Fund", "price_usd": 750, "category": "Fixed Income"}
+      ]
+    }
+  },
+  "interaction_examples": {
+    "create_membership": {
+      "description": "Create a membership NFT for a new user",
+      "contract": "FlowPassportRegistry",
+      "function": "createOrLinkMembership",
+      "example": "await registryContract.createOrLinkMembership('0x742d35Cc6634C0532925a3b8D7389Fde5Fd8ee6c')"
+    },
+    "submit_exam_result": {
+      "description": "Submit exam result and auto-create certificate child NFT",
+      "contract": "AcademyCertificationV2", 
+      "function": "submitExamResult",
+      "example": "await academyContract.submitExamResult('0x742d35Cc6634C0532925a3b8D7389Fde5Fd8ee6c', 0, 8, 10)",
+      "note": "ModuleLevel: 0=BEGINNER, 1=INTERMEDIATE, 2=ADVANCED"
+    },
+    "purchase_asset": {
+      "description": "Purchase asset and auto-create asset child NFT",
+      "contract": "AssetMarketplaceV2",
+      "function": "purchaseAsset", 
+      "example": "await marketplaceContract.purchaseAsset('1', { value: ethers.parseEther('1500') })",
+      "note": "Asset ID '1' = Lisbon Apartment, price = 1500 FLOW"
+    },
+    "get_user_profile": {
+      "description": "Get complete user profile with all certificates and assets",
+      "contract": "FlowPassportRegistry",
+      "function": "getCompleteUserProfile",
+      "example": "const { profile, certificates, assets } = await registryContract.getCompleteUserProfile('0x742d35Cc6634C0532925a3b8D7389Fde5Fd8ee6c')"
+    },
+    "check_reputation": {
+      "description": "Check user's reputation score",
+      "contract": "FlowPassportMembership",
+      "function": "getMembershipInfo",
+      "example": "const membershipInfo = await membershipContract.getMembershipInfo('0x742d35Cc6634C0532925a3b8D7389Fde5Fd8ee6c'); console.log('Reputation:', membershipInfo.reputationScore)"
+    }
+  },
+  "contract_relationships": {
+    "hierarchy": {
+      "FlowPassportMembership": "Master NFT contract - issues soulbound identity NFTs",
+      "FlowPassportRegistry": "Central hub - manages all relationships and child NFTs",
+      "AcademyCertificationV2": "Academy system - creates certificate child NFTs via registry",
+      "AssetMarketplaceV2": "Marketplace system - creates asset child NFTs via registry"
+    },
+    "data_flow": {
+      "user_onboarding": "Registry → creates membership in FlowPassportMembership",
+      "exam_completion": "AcademyV2 → submits to Registry → creates certificate child NFT",
+      "asset_purchase": "MarketplaceV2 → submits to Registry → creates asset child NFT",
+      "profile_query": "Registry → aggregates data from all contracts"
+    },
+    "authorization": {
+      "FlowPassportMembership": "Only registry can update reputation and counts",
+      "FlowPassportRegistry": "Only authorized contracts can create child NFTs",
+      "AcademyCertificationV2": "Authorized in registry to create certificate child NFTs",
+      "AssetMarketplaceV2": "Authorized in registry to create asset child NFTs"
+    }
+  },
+  "integration_patterns": {
+    "account_abstraction_flow": {
+      "step_1": "User interacts with any platform feature",
+      "step_2": "System checks if user has membership NFT",
+      "step_3": "If no membership, auto-creates via Registry.createOrLinkMembership()",
+      "step_4": "User action (exam/purchase) creates child NFT linked to membership",
+      "step_5": "Reputation score automatically updates based on activity"
+    },
+    "reputation_system": {
+      "starting_score": 100,
+      "certificate_bonus": "+50 points per certificate earned",
+      "asset_bonus": "+25 points per asset purchased",
+      "calculation": "automatic via smart contract, updated on each child NFT creation"
+    },
+    "unified_profile": {
+      "single_query": "Registry.getCompleteUserProfile() returns everything",
+      "membership_info": "Reputation, counts, timestamps, metadata",
+      "certificates": "Array of certificate child NFT IDs",
+      "assets": "Array of asset child NFT IDs",
+      "child_nft_details": "Each child NFT has metadata about the specific achievement/purchase"
+    }
+  }
+}

@@ -23,6 +23,9 @@ export default function Header() {
             <Link href="/academy" className="transition-colors text-gray-600 hover:text-metallic-green">
               Learn
             </Link>
+            <Link href="/profile" className="transition-colors text-gray-600 hover:text-metallic-green">
+              Profile
+            </Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
@@ -53,6 +56,12 @@ export default function Header() {
                   className="flex w-full items-center py-2 text-lg font-semibold text-gray-600 hover:text-metallic-green"
                 >
                   Learn
+                </Link>
+                <Link
+                  href="/profile"
+                  className="flex w-full items-center py-2 text-lg font-semibold text-gray-600 hover:text-metallic-green"
+                >
+                  Profile
                 </Link>
                 <LoginButton />
               </div>

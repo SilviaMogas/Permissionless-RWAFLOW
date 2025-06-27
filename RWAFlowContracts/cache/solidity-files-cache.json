@@ -1073,8 +1073,8 @@
       "artifacts": []
     },
     "/Users/osx/Projects/Permissionless/Permissionless-RWAFLOW/RWAFlowContracts/contracts/AssetMarketplaceV2.sol": {
-      "lastModificationDate": 1750716121920,
-      "contentHash": "297e27008c39da3dacca8a5bae12167c",
+      "lastModificationDate": 1750987568203,
+      "contentHash": "85244d95726006f55f51c1ebb9d9dd8e",
       "sourceName": "contracts/AssetMarketplaceV2.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1102,13 +1102,134 @@
       },
       "imports": [
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "./FlowPassportRegistry.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
         "AssetMarketplaceV2"
+      ]
+    },
+    "/Users/osx/Projects/Permissionless/Permissionless-RWAFLOW/RWAFlowContracts/contracts/FlowPassportRegistry.sol": {
+      "lastModificationDate": 1750987722387,
+      "contentHash": "6aa18d8d9402a3be8bd296ac0be28f5b",
+      "sourceName": "contracts/FlowPassportRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "./FlowPassportMembership.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "FlowPassportRegistry"
+      ]
+    },
+    "/Users/osx/Projects/Permissionless/Permissionless-RWAFLOW/RWAFlowContracts/contracts/FlowPassportMembership.sol": {
+      "lastModificationDate": 1750987028403,
+      "contentHash": "6838a0630f5aaedf9360151db6cd07f0",
+      "sourceName": "contracts/FlowPassportMembership.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "FlowPassportMembership"
+      ]
+    },
+    "/Users/osx/Projects/Permissionless/Permissionless-RWAFLOW/RWAFlowContracts/contracts/AcademyCertificationV2.sol": {
+      "lastModificationDate": 1750987741629,
+      "contentHash": "47716ad58ce9bc014ff33f58aded47e4",
+      "sourceName": "contracts/AcademyCertificationV2.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./FlowPassportRegistry.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "AcademyCertificationV2"
       ]
     }
   }

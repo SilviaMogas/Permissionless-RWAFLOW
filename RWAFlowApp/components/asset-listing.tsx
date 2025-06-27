@@ -3,7 +3,8 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Home, Palette, Zap, Wheat, Landmark, Star, Loader2, Wallet, AlertCircle, ExternalLink } from "lucide-react"
-import { useAssetMarketplace } from "@/hooks/use-asset-marketplace"
+import { useMarketplaceV2 } from "@/hooks/use-marketplace-v2"
+import { useMembershipSystem } from "@/hooks/use-membership-system"
 import { useAuth } from "@/hooks/use-auth"
 import { toast } from "sonner"
 import { useEffect } from "react"
@@ -76,7 +77,6 @@ export default function AssetListing() {
   const {
     hasAsset,
     purchaseAsset,
-    getAssetPriceInFLOW,
     getFlowScanUrl,
     getAssetTransactionHash,
     isPurchasing,
@@ -84,22 +84,26 @@ export default function AssetListing() {
     purchaseSuccess,
     error,
     isLoading,
-  } = useAssetMarketplace()
+    allAssets,
+    userPortfolio
+  } = useMarketplaceV2()
+  const { hasMembership, ensureMembership } = useMembershipSystem()
 
   // Debug: Log contract connection status
   useEffect(() => {
-    console.log("=== AssetListing Debug ===")
-    console.log("Contract Address:", process.env.NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS)
+    console.log("=== AssetListing V2 Debug ===")
+    console.log("Contract Address:", process.env.NEXT_PUBLIC_MARKETPLACE_V2_CONTRACT_ADDRESS)
     console.log("Is Authenticated:", isAuthenticated)
     console.log("Wallet Address:", address)
     console.log("Hook Error:", error)
     console.log("Is Loading:", isLoading)
-  }, [isAuthenticated, address, error, isLoading])
+    console.log("All Assets:", allAssets)
+    console.log("User Portfolio:", userPortfolio)
+  }, [isAuthenticated, address, error, isLoading, allAssets, userPortfolio])
 
-  const handleAddToPortfolio = async (assetId: string, priceUSD: number) => {
-    console.log("=== Purchase Attempt ===")
+  const handleAddToPortfolio = async (assetId: string) => {
+    console.log("=== V2 Purchase Attempt ===")
     console.log("Asset ID:", assetId)
-    console.log("Price USD:", priceUSD)
     console.log("Is Authenticated:", isAuthenticated)
     console.log("Wallet Address:", address)
 
@@ -109,19 +113,19 @@ export default function AssetListing() {
       return
     }
 
-    if (!process.env.NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS) {
-      console.error("Contract address not configured!")
-      toast.error('Contract not configured. Please check environment variables.')
+    if (!process.env.NEXT_PUBLIC_MARKETPLACE_V2_CONTRACT_ADDRESS) {
+      console.error("V2 Contract address not configured!")
+      toast.error('Marketplace V2 contract not configured. Please check environment variables.')
       return
     }
 
     try {
-      console.log("Initiating purchase...")
-      await purchaseAsset(assetId, priceUSD)
-      console.log("Purchase initiated successfully")
-      toast.success('Asset purchase initiated!')
+      console.log("Initiating V2 purchase...")
+      await purchaseAsset(assetId) // V2 automatically handles membership and pricing
+      console.log("V2 Purchase initiated successfully")
+      toast.success('Asset purchase initiated! Child NFT will be created automatically.')
     } catch (error) {
-      console.error('Purchase failed:', error)
+      console.error('V2 Purchase failed:', error)
       toast.error('Purchase failed. Please try again.')
     }
   }
@@ -160,25 +164,39 @@ export default function AssetListing() {
         </p>
         
         {/* Debug info for development */}
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-left max-w-2xl mx-auto">
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-left max-w-2xl mx-auto">
           <div className="font-semibold mb-2 flex items-center">
             <AlertCircle className="h-4 w-4 mr-2" />
-            Debug Info
+            V2 Marketplace Info
           </div>
           <div className="space-y-1 text-xs">
-            <div>Contract: {process.env.NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS || 'Not configured'}</div>
+            <div>V2 Contract: {process.env.NEXT_PUBLIC_MARKETPLACE_V2_CONTRACT_ADDRESS || 'Not configured'}</div>
             <div>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</div>
             <div>Address: {address || 'Not connected'}</div>
-            <div>Contract Loading: {isLoading ? 'Yes' : 'No'}</div>
+            <div>Has Membership: {hasMembership ? 'Yes' : 'No'}</div>
+            <div>Assets Loaded: {allAssets.length}</div>
+            <div>Portfolio Value: ${userPortfolio?.totalValueUSD || 0}</div>
             <div>Contract Error: {error || 'None'}</div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {assets.map((asset) => {
+        {/* Use V2 assets if available, fallback to static assets */}
+        {(allAssets.length > 0 ? allAssets : assets).map((assetData) => {
+          // For V2 assets, use the contract data; for static assets, use local data
+          const asset = allAssets.length > 0 ? {
+            id: assetData.id,
+            name: assetData.name,
+            roi: "Dynamic", // V2 doesn't have ROI in this format
+            verifiedBy: "Flow Blockchain",
+            score: 5, // All V2 assets are verified
+            price: assetData.priceUSD,
+            icon: assets.find(a => a.id === assetData.id)?.icon || <Home className="h-8 w-8 text-metallic-green" />,
+            iconBg: "bg-emerald-100",
+          } : assetData
+          
           const isOwned = hasAsset(asset.id)
-          const flowPrice = getAssetPriceInFLOW(asset.id)
           const flowScanUrl = getFlowScanUrl(asset.id)
           const txHash = getAssetTransactionHash(asset.id)
           
@@ -213,8 +231,8 @@ export default function AssetListing() {
                   <span className="font-semibold text-gray-700">Price:</span>
                   <div className="text-right">
                     <div className="font-bold text-gray-800">${asset.price.toLocaleString()}</div>
-                    {flowPrice && (
-                      <div className="text-xs text-gray-500">{flowPrice} FLOW</div>
+                    {allAssets.length > 0 && assetData.priceFLOW && (
+                      <div className="text-xs text-gray-500">{assetData.priceFLOW} FLOW</div>
                     )}
                   </div>
                 </div>
@@ -242,7 +260,7 @@ export default function AssetListing() {
                       onClick={() => {
                         console.log("Add to Portfolio clicked for asset:", asset.id)
                         if (!isOwned && !isPurchasing) {
-                          handleAddToPortfolio(asset.id, asset.price)
+                          handleAddToPortfolio(asset.id)
                         }
                       }}
                       disabled={isOwned || isPurchasing}

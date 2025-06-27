@@ -96,12 +96,13 @@ Flow Passport/
 
 ## 📱 Platform Components
 
-### Flow Passport Identity System
-- **Digital Identity**: Unified profile across all platform features
-- **Education Tracking**: Blockchain-verified progress and NFT certificates
-- **Investment History**: Complete portfolio and transaction history
-- **Reputation System**: Community-driven credibility scoring with on-chain achievements
-- **Cross-Platform Integration**: Compatible with major DeFi protocols
+### Flow Passport Identity System with Account Abstraction
+- **Master Membership NFT**: Single soulbound NFT representing user's digital identity
+- **Hierarchical NFT Structure**: Child NFTs for certificates and asset ownership linked to membership
+- **Automated Wallet Creation**: Account abstraction enables seamless onboarding without wallet complexity
+- **Unified Profile**: All achievements, assets, and interactions tied to one membership identity
+- **Reputation System**: Dynamic scoring based on educational progress and investment activity
+- **Cross-Platform Integration**: Compatible with major DeFi protocols and account abstraction providers
 
 ### Academy NFT Certification System
 A comprehensive certification system that rewards educational achievement:
@@ -144,34 +145,60 @@ Currently featuring 5 premium tokenized assets:
 
 ## 🔗 Smart Contract Architecture
 
-### AssetMarketplace Contract
-**Address**: `0xc7403912b47Bd062E1933D40027088ACD5066deD` (Flow Testnet)
+### V2 Account Abstraction Contracts
+
+#### FlowPassportMembership Contract (Master NFT)
+**Address**: `0x04788614eecB86a9eEF39928D8dafBfAe54476a8` (Flow Testnet)
+**Purpose**: Issues soulbound membership NFTs representing user identity
 
 **Core Functions**:
-- `purchaseAsset()`: Acquire tokenized assets with FLOW
-- `hasAsset()`: Check asset ownership status
-- `getUserAssets()`: Retrieve user's complete portfolio
-- Asset pricing with automatic USD/FLOW conversion (1 USD = 3 FLOW)
+- `createMembership()`: Mint membership NFT on first user interaction
+- `getMembershipInfo()`: Retrieve complete user profile and reputation
+- `updateReputationScore()`: Dynamic reputation updates based on activity
+- `incrementCertificateCount()`: Track educational achievements
+- `incrementAssetCount()`: Track investment portfolio growth
 
-### Academy Certification Contracts
-
-#### AcademyCertification Contract
-**Address**: `0x66206f19Ca68C1B6286673ED3E7500AD50827df2` (Flow Testnet)
+#### FlowPassportRegistry Contract (Central Hub)
+**Address**: `0xdf03552Dd7afB410DE95E3c810AB7b39299904E7` (Flow Testnet)
+**Purpose**: Manages hierarchical NFT relationships and user profiles
 
 **Core Functions**:
-- `submitExamResult()`: Record exam scores and pass/fail status
+- `createOrLinkMembership()`: Auto-create membership for new users
+- `addChildNFT()`: Link certificates and assets as child NFTs
+- `getUserProfile()`: Get complete user profile with child NFTs
+- `getCompleteUserProfile()`: Unified view of certificates and assets
+- `authorizeContract()`: Manage which contracts can create child NFTs
+
+#### AcademyCertificationV2 Contract
+**Address**: `0x525715A1BcC513F66Eecea513652fc294833ef6C` (Flow Testnet)
+**Purpose**: Enhanced academy system with automatic membership integration
+
+**Core Functions**:
+- `submitExamResult()`: Record exam scores and auto-create child NFTs
 - `hasPassedModule()`: Check if user passed a specific module
 - `getExamResult()`: Retrieve detailed exam results
-- `getUserPassedModules()`: Get all passed modules for a user
+- Integration with registry for automatic certificate linking
 
-#### AcademyNFT Contract
-**Address**: `0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B` (Flow Testnet)
+#### AssetMarketplaceV2 Contract
+**Address**: `0xc4951B1C022A29b4dCdbB3DE06e5C2f7A5767501` (Flow Testnet)
+**Purpose**: Enhanced marketplace with membership integration
 
 **Core Functions**:
-- `mintCertificate()`: Mint soulbound certificate NFT for passed modules
-- `hasUserMintedCertificate()`: Check if user already has certificate
-- `canMintCertificate()`: Verify minting eligibility
-- `getUserCertificates()`: Get all user's certificate token IDs
+- `purchaseAsset()`: Buy assets and auto-create child NFTs
+- `hasAsset()`: Check asset ownership status
+- `getUserAssets()`: Retrieve user's complete portfolio
+- Automatic membership creation and asset linking
+
+### Legacy V1 Contracts (Deprecated)
+
+#### AssetMarketplace Contract (V1)
+**Address**: `0xc7403912b47Bd062E1933D40027088ACD5066deD` (Flow Testnet)
+
+#### AcademyCertification Contract (V1)
+**Address**: `0x66206f19Ca68C1B6286673ED3E7500AD50827df2` (Flow Testnet)
+
+#### AcademyNFT Contract (V1)
+**Address**: `0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B` (Flow Testnet)
 
 ### RWAFlow Token (RWAF)
 **Address**: `0x6fBD4A26B44046716e37cD93Db5c47832E276AeB` (Flow Testnet)
@@ -186,8 +213,11 @@ Currently featuring 5 premium tokenized assets:
 - **OpenZeppelin Standards**: Battle-tested security patterns
 - **ReentrancyGuard Protection**: Prevents reentrancy attacks
 - **Owner Controls**: Administrative functions restricted to contract owners
-- **Soulbound NFTs**: Academy certificates are non-transferable
-- **Duplicate Prevention**: One certificate per module per user
+- **Soulbound NFTs**: Membership and certificates are non-transferable
+- **Access Control**: Registry-based authorization for child NFT creation
+- **Hierarchical Validation**: Child NFTs can only be created by authorized contracts
+- **Duplicate Prevention**: One membership per user, one certificate per module
+- **Account Abstraction Security**: Secure wallet creation and management
 
 ## 🚀 Quick Start Guide
 
@@ -240,11 +270,15 @@ npm run deploy:academy
 
 **Frontend (.env)**:
 ```env
-# Contract addresses
+# V2 Account Abstraction Contracts (Recommended)
+NEXT_PUBLIC_MEMBERSHIP_CONTRACT_ADDRESS=0x04788614eecB86a9eEF39928D8dafBfAe54476a8
+NEXT_PUBLIC_REGISTRY_CONTRACT_ADDRESS=0xdf03552Dd7afB410DE95E3c810AB7b39299904E7
+NEXT_PUBLIC_ACADEMY_V2_CONTRACT_ADDRESS=0x525715A1BcC513F66Eecea513652fc294833ef6C
+NEXT_PUBLIC_MARKETPLACE_V2_CONTRACT_ADDRESS=0xc4951B1C022A29b4dCdbB3DE06e5C2f7A5767501
+
+# Legacy V1 Contracts (Backwards Compatibility)
 NEXT_PUBLIC_ASSET_MARKETPLACE_CONTRACT_ADDRESS=0xc7403912b47Bd062E1933D40027088ACD5066deD
 NEXT_PUBLIC_RWAFLOW_TOKEN_ADDRESS=0x6fBD4A26B44046716e37cD93Db5c47832E276AeB
-
-# Academy contracts
 NEXT_PUBLIC_ACADEMY_CERTIFICATION_ADDRESS=0x66206f19Ca68C1B6286673ED3E7500AD50827df2
 NEXT_PUBLIC_ACADEMY_NFT_ADDRESS=0xA5AC23d9f4EDc3068081D08214aa2D8fA7de7f4B
 
@@ -350,10 +384,18 @@ npx hardhat verify --network flowTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
 - [x] Final score display with percentage badges
 - [x] NFT Explorer integration with FlowScan block explorer
 - [x] One-click NFT certificate minting functionality
+- [x] **Account Abstraction Integration**: Master membership NFTs with hierarchical structure
+- [x] **V2 Smart Contracts**: Enhanced contracts with automatic membership creation
+- [x] **Unified Identity System**: Single membership NFT linking all user activities
+- [x] **Contract Deployment**: All V2 contracts deployed and tested on Flow Testnet
+- [x] **Hierarchical NFT System**: Child NFTs for certificates and assets linked to membership
 - [ ] Enhanced AI investment recommendations
 - [ ] Additional tokenized asset categories
 - [ ] Multi-language platform support
 - [ ] Advanced portfolio analytics
+- [ ] Account abstraction provider integration (Biconomy, Gelato, etc.)
+- [ ] Gasless transaction implementation
+- [ ] Frontend migration to V2 contracts
 
 ### Q2 2025
 - [ ] Cross-chain asset support
@@ -384,6 +426,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Live Application**: [Flow Passport Platform](https://flow-passport.vercel.app/)
 - **Pitch Deck**: [Project Presentation](https://www.canva.com/design/DAGrIUspFyc/vcwA0SHoc4inO0rgCk_rcw/edit)
 - **FlowScan**: [Smart Contract Explorer](https://evm-testnet.flowscan.io)
+- **V2 Contracts on FlowScan**:
+  - [FlowPassportMembership](https://evm-testnet.flowscan.io/address/0x04788614eecB86a9eEF39928D8dafBfAe54476a8)
+  - [FlowPassportRegistry](https://evm-testnet.flowscan.io/address/0xdf03552Dd7afB410DE95E3c810AB7b39299904E7)
+  - [AcademyCertificationV2](https://evm-testnet.flowscan.io/address/0x525715A1BcC513F66Eecea513652fc294833ef6C)
+  - [AssetMarketplaceV2](https://evm-testnet.flowscan.io/address/0xc4951B1C022A29b4dCdbB3DE06e5C2f7A5767501)
 - **Community**: [Discord](https://discord.gg/flowpassport)
 - **Twitter**: [@FlowPassport](https://twitter.com/flowpassport)
 
