@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Home, TrendingUp, Wallet, Target } from "lucide-react"
+import { CheckCircle, Home, TrendingUp, Wallet, Target, Award, Star } from "lucide-react"
+import { useMarketplaceV2 } from "@/hooks/use-marketplace-v2"
+import { useMembershipSystem } from "@/hooks/use-membership-system"
+import { useAuth } from "@/hooks/use-auth"
 
 const dashboardData = {
   totalInvested: 500,
@@ -22,16 +25,36 @@ const dashboardData = {
 }
 
 export default function DashboardSummary() {
+  const { isAuthenticated } = useAuth()
+  const { userPortfolio, getTotalPortfolioValue, getPortfolioDistribution } = useMarketplaceV2()
+  const { userProfile, hasMembership, getReputationLevel } = useMembershipSystem()
+
+  // Use V2 data if available, fallback to static data
+  const portfolioValue = getTotalPortfolioValue()
+  const totalInvested = portfolioValue.usd || dashboardData.totalInvested
+  const assetsCount = userPortfolio?.totalAssets || dashboardData.assetsCount
+  const reputationLevel = getReputationLevel()
+  const reputationScore = userProfile?.reputationScore || 0
+  const distribution = getPortfolioDistribution()
+
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Your Investment Dashboard</h1>
-        {dashboardData.kycVerified && (
-          <Badge variant="outline" className="border-emerald-300 text-metallic-green bg-emerald-50">
-            <CheckCircle className="mr-1 h-4 w-4" />
-            KYC Verified
-          </Badge>
-        )}
+        <div className="flex gap-2">
+          {hasMembership && (
+            <Badge variant="outline" className="border-blue-300 text-blue-600 bg-blue-50">
+              <Award className="mr-1 h-4 w-4" />
+              Member
+            </Badge>
+          )}
+          {isAuthenticated && (
+            <Badge variant="outline" className="border-purple-300 text-purple-600 bg-purple-50">
+              <Star className="mr-1 h-4 w-4" />
+              {reputationLevel}
+            </Badge>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
@@ -40,7 +63,7 @@ export default function DashboardSummary() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Total Invested</p>
-                <p className="text-3xl font-bold text-gray-800">${dashboardData.totalInvested.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-gray-800">${totalInvested.toLocaleString()}</p>
               </div>
               <Wallet className="h-8 w-8 text-metallic-green" />
             </div>
@@ -51,10 +74,10 @@ export default function DashboardSummary() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Expected ROI</p>
-                <p className="text-3xl font-bold text-metallic-green">{dashboardData.expectedROI}%</p>
+                <p className="text-sm text-gray-500 mb-1">Reputation Score</p>
+                <p className="text-3xl font-bold text-metallic-green">{reputationScore}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-metallic-green" />
+              <Star className="h-8 w-8 text-metallic-green" />
             </div>
           </CardContent>
         </Card>
@@ -64,7 +87,7 @@ export default function DashboardSummary() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Assets</p>
-                <p className="text-3xl font-bold text-gray-800">{dashboardData.assetsCount}</p>
+                <p className="text-3xl font-bold text-gray-800">{assetsCount}</p>
               </div>
               <Target className="h-8 w-8 text-metallic-green" />
             </div>
@@ -75,10 +98,10 @@ export default function DashboardSummary() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Status</p>
-                <p className="text-xl font-semibold text-gray-700">{dashboardData.status}</p>
+                <p className="text-sm text-gray-500 mb-1">Membership</p>
+                <p className="text-xl font-semibold text-gray-700">{hasMembership ? 'Active' : 'Not Active'}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-metallic-green" />
+              <Award className="h-8 w-8 text-metallic-green" />
             </div>
           </CardContent>
         </Card>

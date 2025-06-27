@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { X, Clock, Award, Check, AlertTriangle, Gift, Loader2, Star } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useAcademyContracts } from "@/hooks/use-academy-contracts"
+import { useAcademyV2 } from "@/hooks/use-academy-v2"
+import { useMembershipSystem } from "@/hooks/use-membership-system"
 import { useAuth } from "@/hooks/use-auth"
 import { toast } from "sonner"
 
@@ -31,15 +32,11 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
   const { isAuthenticated } = useAuth()
   const {
     submitExamResult,
-    mintCertificate,
     hasPassedModule,
-    canMintCertificate,
-    hasUserMintedCertificate,
     isSubmittingExam,
-    isMintingNFT,
-    examSubmissionSuccess,
-    nftMintingSuccess
-  } = useAcademyContracts()
+    examSubmissionSuccess
+  } = useAcademyV2()
+  const { hasMembership, ensureMembership } = useMembershipSystem()
   
   const currentQuestion = module.questions[currentQuestionIndex]
 
@@ -96,40 +93,26 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
     if (showResults && !hasSubmittedExam && isAuthenticated) {
       const submitExam = async () => {
         try {
+          // Ensure user has membership first (V2 requirement)
+          await ensureMembership()
           await submitExamResult(moduleId, score, module.questions.length)
           setHasSubmittedExam(true)
-          
-          // Show NFT minting option if passed
-          if (isPassed) {
-            setTimeout(() => setShowNFTMinting(true), 2000)
-          }
         } catch (error) {
           console.error('Failed to submit exam result:', error)
         }
       }
       submitExam()
     }
-  }, [showResults, hasSubmittedExam, isAuthenticated, submitExamResult, moduleId, score, module.questions.length, isPassed])
+  }, [showResults, hasSubmittedExam, isAuthenticated, submitExamResult, moduleId, score, module.questions.length, ensureMembership])
 
-  // Handle successful NFT minting
+  // Handle successful exam submission
   useEffect(() => {
-    if (nftMintingSuccess) {
-      toast.success('🎉 Certificate NFT minted successfully!')
-      setShowNFTMinting(false)
+    if (examSubmissionSuccess) {
+      toast.success('🎉 Exam completed! Certificate automatically created as child NFT!')
     }
-  }, [nftMintingSuccess])
-
-  const handleMintCertificate = async () => {
-    try {
-      await mintCertificate(moduleId)
-    } catch (error) {
-      console.error('Failed to mint certificate:', error)
-    }
-  }
+  }, [examSubmissionSuccess])
 
   if (showResults) {
-    const alreadyHasCertificate = hasUserMintedCertificate(moduleId)
-    const canMint = canMintCertificate(moduleId)
     const userHasPassed = hasPassedModule(moduleId)
 
     return (
@@ -183,43 +166,18 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
                 </div>
               )}
 
-              {isPassed && isAuthenticated && showNFTMinting && (
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
-                  <Gift className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <h3 className="text-lg font-semibold text-purple-800 mb-2">
-                    Claim Your Certificate NFT!
+              {isPassed && isAuthenticated && examSubmissionSuccess && (
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border border-green-200">
+                  <Award className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <h3 className="text-lg font-semibold text-green-800 mb-2">
+                    Certificate Automatically Created!
                   </h3>
-                  <p className="text-sm text-purple-600 mb-3">
-                    You've earned a soulbound certificate NFT for passing this module.
+                  <p className="text-sm text-green-600 mb-3">
+                    Your certificate has been automatically created as a child NFT linked to your membership.
                   </p>
-                  
-                  {alreadyHasCertificate ? (
-                    <div className="text-metallic-green font-semibold">
-                      ✅ Certificate already minted!
-                    </div>
-                  ) : canMint ? (
-                    <Button
-                      onClick={handleMintCertificate}
-                      disabled={isMintingNFT}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      {isMintingNFT ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Minting NFT...
-                        </>
-                      ) : (
-                        <>
-                          <Gift className="mr-2 h-4 w-4" />
-                          Mint Certificate NFT
-                        </>
-                      )}
-                    </Button>
-                  ) : userHasPassed ? (
-                    <div className="text-gray-600 text-sm">
-                      Certificate already claimed or not available
-                    </div>
-                  ) : null}
+                  <div className="text-green-700 font-semibold">
+                    ✅ Certificate Child NFT Created
+                  </div>
                 </div>
               )}
             </div>
@@ -228,7 +186,7 @@ export default function QuizInterface({ module }: QuizInterfaceProps) {
           {!isAuthenticated && isPassed && (
             <div className="my-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-yellow-800 text-sm">
-                Connect your wallet to save your progress and claim your certificate NFT!
+                Connect your wallet to save your progress and automatically create your certificate child NFT!
               </p>
             </div>
           )}

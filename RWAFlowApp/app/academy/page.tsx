@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Star, TrendingUp, BookOpen, CheckCircle, Circle, Award, Gem, PlayCircle, Medal, ExternalLink, Gift } from "lucide-react"
 import type { QuizQuestion, LearningModule } from "@/app/academy/module/[moduleId]/types"
-import { useAcademyContracts } from "@/hooks/use-academy-contracts"
+import { useAcademyV2 } from "@/hooks/use-academy-v2"
+import { useMembershipSystem } from "@/hooks/use-membership-system"
 import { useAuth } from "@/hooks/use-auth"
 
 const csvData = `Level,Question,Option A,Option B,Option C,Correct Answer
@@ -171,7 +172,8 @@ const StatCard = ({ title, value, icon }: { title: string; value: string | numbe
 export default function AcademyPage() {
   const { currentLevel, experience, flowTokens, modulesCompleted, totalModules, nft, modules } = academyData
   const { isAuthenticated } = useAuth()
-  const { hasPassedModule, hasUserMintedCertificate, getUserCertificates, mintCertificate, canMintCertificate, getExamResult } = useAcademyContracts()
+  const { hasPassedModule, getExamResult, getModuleName, getTotalCertificatesEarned, getCompletionPercentage } = useAcademyV2()
+  const { userProfile, completeProfile, hasMembership, getReputationLevel } = useMembershipSystem()
 
   // Get dynamic completion status if user is authenticated
   const getModuleCompletion = (moduleId: string) => {
@@ -179,48 +181,30 @@ export default function AcademyPage() {
     return hasPassedModule(moduleId)
   }
 
-  const getModuleCertificateStatus = (moduleId: string) => {
-    if (!isAuthenticated) return false
-    return hasUserMintedCertificate(moduleId)
-  }
-
   // Calculate dynamic stats for authenticated users
   const dynamicModulesCompleted = isAuthenticated 
     ? modules.filter(module => getModuleCompletion(module.id)).length
     : modulesCompleted
 
-  const userCertificates = isAuthenticated ? getUserCertificates() : []
-  const totalCertificates = userCertificates.filter(id => id > 0).length
+  const totalCertificates = isAuthenticated ? getTotalCertificatesEarned() : 0
+  
+  // Get user's reputation data
+  const reputationLevel = isAuthenticated ? getReputationLevel() : 'Newcomer'
+  const currentReputation = userProfile?.reputationScore || 0
 
-  // Helper function to get NFT explorer URL
+  // Helper function to get NFT explorer URL for V2 system
   const getNFTExplorerUrl = (moduleId: string) => {
-    // Get the certificate ID for this module
-    const certificates = getUserCertificates()
-    let certificateId = 0
+    if (!completeProfile) return null
     
-    if (moduleId === 'beginner-rwa-quiz' && certificates[0] > 0) {
-      certificateId = certificates[0]
-    } else if (moduleId === 'intermediate-rwa-quiz' && certificates[1] > 0) {
-      certificateId = certificates[1]
-    } else if (moduleId === 'advanced-rwa-quiz' && certificates[2] > 0) {
-      certificateId = certificates[2]
-    }
-    
-    if (certificateId > 0) {
-      // Flow Testnet FlowScan explorer URL for NFT using deployed contract address
-      const nftContractAddress = process.env.NEXT_PUBLIC_ACADEMY_NFT_ADDRESS
-      return `https://evm-testnet.flowscan.io/token/${nftContractAddress}/instance/${certificateId}`
+    // In V2, certificates are automatically created as child NFTs
+    // Check if the user has certificates for this module
+    const certificates = completeProfile.certificates
+    if (certificates && certificates.length > 0) {
+      // For V2, we link to the registry to show the complete profile
+      const registryAddress = process.env.NEXT_PUBLIC_REGISTRY_CONTRACT_ADDRESS
+      return `https://evm-testnet.flowscan.io/address/${registryAddress}`
     }
     return null
-  }
-
-  // Handle NFT minting
-  const handleMintNFT = async (moduleId: string) => {
-    try {
-      await mintCertificate(moduleId)
-    } catch (error) {
-      console.error('Failed to mint NFT:', error)
-    }
   }
 
   return (
@@ -230,24 +214,31 @@ export default function AcademyPage() {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <StatCard title="Current Level" value={currentLevel} icon={<Star className="h-8 w-8 text-yellow-400" />} />
+          <StatCard 
+            title="Reputation Level" 
+            value={reputationLevel} 
+            icon={<Star className="h-8 w-8 text-yellow-400" />} 
+          />
           <StatCard
-            title="Experience"
-            value={`${experience} XP`}
+            title="Reputation Score"
+            value={currentReputation}
             icon={<TrendingUp className="h-8 w-8 text-metallic-green" />}
           />
-          <StatCard title="Flow Tokens" value={flowTokens} icon={<Gem className="h-8 w-8 text-purple-500" />} />{" "}
-          {/* Kept purple for variety or change to metallic-green */}
+          <StatCard 
+            title="Certificates Earned" 
+            value={totalCertificates} 
+            icon={<Medal className="h-8 w-8 text-purple-500" />} 
+          />
           <StatCard
             title="Modules"
             value={`${dynamicModulesCompleted}/${totalModules}`}
             icon={<BookOpen className="h-8 w-8 text-metallic-green" />}
           />
-          {isAuthenticated && (
+          {isAuthenticated && hasMembership && (
             <StatCard
-              title="NFT Certificates"
-              value={totalCertificates}
-              icon={<Medal className="h-8 w-8 text-purple-500" />}
+              title="Membership Status"
+              value="Active"
+              icon={<Award className="h-8 w-8 text-green-500" />}
             />
           )}
         </div>
@@ -290,8 +281,7 @@ export default function AcademyPage() {
             <CardContent className="space-y-3">
               {modules.map((quizModule) => {
                 const isCompleted = getModuleCompletion(quizModule.id)
-                const hasCertificate = getModuleCertificateStatus(quizModule.id)
-                const canMint = isAuthenticated && canMintCertificate(quizModule.id)
+                const hasCertificate = isCompleted // In V2, certificates are automatically created
                 const nftExplorerUrl = getNFTExplorerUrl(quizModule.id)
                 const examResult = isAuthenticated ? getExamResult(quizModule.id) : null
                 
@@ -318,7 +308,7 @@ export default function AcademyPage() {
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-metallic-green font-medium">
-                              ✅ Passed {hasCertificate ? '• NFT Earned' : '• Certificate Available'}
+                              ✅ Passed • Certificate Child NFT Created
                             </p>
                             {percentageScore !== null && (
                               <span className="text-xs bg-metallic-green text-white px-2 py-1 rounded-full font-medium">
@@ -351,35 +341,22 @@ export default function AcademyPage() {
                       </Link>
                     )}
                     
-                    {/* NFT Action Buttons */}
+                    {/* V2 NFT Action Buttons */}
                     {isAuthenticated && isCompleted && (
                       <div className="mt-3 flex gap-2">
-                        {hasCertificate ? (
-                          // Show "View NFT" button if user has minted certificate
-                          nftExplorerUrl && (
-                            <Button
-                              asChild
-                              variant="outline"
-                              size="sm"
-                              className="text-metallic-green border-metallic-green hover:bg-green-50 hover:text-metallic-green bg-transparent"
-                            >
-                              <Link href={nftExplorerUrl} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                View NFT in Explorer
-                              </Link>
-                            </Button>
-                          )
-                        ) : canMint ? (
-                          // Show "Mint NFT" button if user passed but hasn't minted
+                        {nftExplorerUrl && (
                           <Button
-                            onClick={() => handleMintNFT(quizModule.id)}
+                            asChild
+                            variant="outline"
                             size="sm"
-                            className="bg-purple-600 text-white hover:bg-purple-700"
+                            className="text-metallic-green border-metallic-green hover:bg-green-50 hover:text-metallic-green bg-transparent"
                           >
-                            <Gift className="mr-2 h-4 w-4" />
-                            Mint Certificate NFT
+                            <Link href={nftExplorerUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              View Complete Profile
+                            </Link>
                           </Button>
-                        ) : null}
+                        )}
                       </div>
                     )}
                   </div>
