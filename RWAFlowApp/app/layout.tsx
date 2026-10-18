@@ -10,8 +10,7 @@ import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
   title: "Flow Passport - Your Gateway to Onchain Identity, Investment & Education",
-  description: "Discover, compare and invest in verified tokenized real-world assets with Flow Passport.",
-  generator: "v0.dev",
+  description: "Explore real-world asset tokenization and DeFi education with Flow Passport on Flow testnet.",
 }
 
 export default function RootLayout({
